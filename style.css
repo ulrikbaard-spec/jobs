@@ -613,6 +613,17 @@ select {
     gap: 10px;
 }
 
+.load-more-wrap {
+    margin-top: 16px;
+    text-align: center;
+}
+
+.load-more-btn {
+    width: 100%;
+    max-width: 360px;
+    box-shadow: var(--shadow-sm);
+}
+
 .job-card {
     position: relative;
     background: var(--white);
@@ -1137,3 +1148,4 @@ select {
         grid-column: auto;
     }
 }
+
