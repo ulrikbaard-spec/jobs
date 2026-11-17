@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="sv">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
@@ -9,9 +10,11 @@
     <title>AB-Hem · Jobs</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=1.2">
 </head>
+
 <body>
 
     <!-- =========================================================
@@ -28,16 +31,20 @@
             </div>
 
             <div class="header-actions">
-                <button type="button" id="btn-toggle-filters" class="icon-btn filter-toggle-btn" aria-expanded="true" aria-controls="filter-panel">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" id="btn-toggle-filters" class="icon-btn filter-toggle-btn" aria-expanded="true"
+                    aria-controls="filter-panel">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                     </svg>
                     <span>Filter</span>
                     <span id="active-filter-badge" class="filter-count-badge" hidden>0</span>
                 </button>
 
-                <button type="button" id="btn-refresh" class="icon-btn" title="Hämta senaste data från Google Sheet" aria-label="Uppdatera">
-                    <svg id="refresh-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" id="btn-refresh" class="icon-btn" title="Hämta senaste data från Google Sheet"
+                    aria-label="Uppdatera">
+                    <svg id="refresh-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 2v6h-6"></path>
                         <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
                         <path d="M3 22v-6h6"></path>
@@ -65,13 +72,17 @@
                 <div>
                     <h2>Google-arket kräver läsbehörighet</h2>
                     <p>
-                        Just nu omdirigerar Google Sheets till inloggningssidan eftersom dokumentet är inställt på <strong>Begränsad</strong>.
+                        Just nu omdirigerar Google Sheets till inloggningssidan eftersom dokumentet är inställt på
+                        <strong>Begränsad</strong>.
                     </p>
                 </div>
             </div>
             <ol class="access-steps">
-                <li>Öppna <a href="https://docs.google.com/spreadsheets/d/1l_nOEIaMlOuiyAec5ElWUj5kQajIlC6_EHJZhazx6HU/edit?gid=0#gid=0" target="_blank" rel="noopener">Google Sheet-dokumentet ↗</a></li>
-                <li>Klicka på <strong>Dela</strong> (uppe till höger) → under <em>Allmän åtkomst</em>, ändra till <strong>Alla med länken</strong> (<em>Läsare</em>).</li>
+                <li>Öppna <a
+                        href="https://docs.google.com/spreadsheets/d/1l_nOEIaMlOuiyAec5ElWUj5kQajIlC6_EHJZhazx6HU/edit?gid=0#gid=0"
+                        target="_blank" rel="noopener">Google Sheet-dokumentet ↗</a></li>
+                <li>Klicka på <strong>Dela</strong> (uppe till höger) → under <em>Allmän åtkomst</em>, ändra till
+                    <strong>Alla med länken</strong> (<em>Läsare</em>).</li>
                 <li>Tryck på <strong>Försök igen</strong> nedan så läses alla rader in direkt.</li>
             </ol>
             <div class="access-actions">
@@ -89,18 +100,16 @@
             <!-- Sökfält för Nr & fritext -->
             <div class="search-row">
                 <div class="search-input-wrap">
-                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input
-                        type="search"
-                        id="filter-search"
-                        placeholder="Sök på Nr (t.ex. 1042), rubrik, adress, huskod…"
-                        autocomplete="off"
-                        inputmode="search"
-                    >
-                    <button type="button" id="btn-clear-search" class="clear-input-btn" hidden aria-label="Rensa sökning">✕</button>
+                    <input type="search" id="filter-search"
+                        placeholder="Sök på Nr (t.ex. 1042), rubrik, adress, huskod…" autocomplete="off"
+                        inputmode="search">
+                    <button type="button" id="btn-clear-search" class="clear-input-btn" hidden
+                        aria-label="Rensa sökning">✕</button>
                 </div>
             </div>
 
@@ -129,13 +138,8 @@
 
                 <div class="filter-field">
                     <label for="filter-nr">Jobb-Nr</label>
-                    <input
-                        type="text"
-                        id="filter-nr"
-                        placeholder="Exakt eller del av Nr…"
-                        inputmode="text"
-                        autocomplete="off"
-                    >
+                    <input type="text" id="filter-nr" placeholder="Exakt eller del av Nr…" inputmode="text"
+                        autocomplete="off">
                 </div>
             </div>
 
@@ -204,7 +208,8 @@
         <section id="empty-state" class="empty-state" hidden>
             <div class="empty-icon">🔍</div>
             <h3>Inga jobb matchar filtren</h3>
-            <p>Prova att ändra eller återställa dina valda filter för Fastighetsskötare, Status, Typ, Nr eller Skapad datum.</p>
+            <p>Prova att ändra eller återställa dina valda filter för Fastighetsskötare, Status, Typ, Nr eller Skapad
+                datum.</p>
             <button type="button" id="btn-empty-reset" class="btn btn-primary">
                 Rensa alla filter
             </button>
@@ -255,7 +260,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=1.2"></script>
+    <script src="app.js?v=1.3"></script>
 </body>
-</html>
 
+</html>

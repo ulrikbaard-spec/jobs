@@ -559,20 +559,117 @@ function setLoading(loading) {
 }
 
 /* =========================================================
-   POPULERA DROPDOWNS & KPI-PILLER
+   POPULERA DROPDOWNS & KPI-PILLER (DYNAMISKT / FACETTERAT)
    ========================================================= */
 
-function populateFilterOptions() {
-    populateSelectWithCounts(els.filterCaretaker, "Fastighetsskötare", "Alla fastighetsskötare", state.filters.caretaker, false);
-    populateStatusSelect();
-    populateSelectWithCounts(els.filterType, "Typ", "Alla typer", state.filters.type, true);
+function doesJobMatchFilters(job, ignoreField = "") {
+    const f = state.filters;
+    const searchLower = f.search.toLowerCase();
+    const nrLower = f.nr.toLowerCase();
+
+    // 1. Fastighetsskötare
+    if (ignoreField !== "caretaker" && f.caretaker) {
+        if (cleanFormulaZero(job["Fastighetsskötare"]) !== f.caretaker) {
+            return false;
+        }
+    }
+
+    // 2. Status
+    if (ignoreField !== "status" && f.status) {
+        if (f.status === "__ACTIVE__") {
+            if (!isJobOpenStatus(job["Status"])) return false;
+        } else if ((job["Status"] || "").trim() !== f.status) {
+            return false;
+        }
+    }
+
+    // 3. Typ (skiftlägesoberoende)
+    if (ignoreField !== "type" && f.type) {
+        if (cleanFormulaZero(job["Typ"]).toLowerCase() !== f.type.toLowerCase()) {
+            return false;
+        }
+    }
+
+    // 4. Jobb-Nr
+    if (ignoreField !== "nr" && nrLower) {
+        if (!(job["Nr"] || "").toLowerCase().includes(nrLower)) {
+            return false;
+        }
+    }
+
+    // 5. Endast akuta
+    if (ignoreField !== "acute" && f.acuteOnly) {
+        if (!isJobAcute(job)) {
+            return false;
+        }
+    }
+
+    // 6. Skapad datum (Från / Till)
+    if (ignoreField !== "date" && (f.dateFrom || f.dateTo)) {
+        const jobDate = normalizeDateString(job["Skapad datum"]);
+        if (!jobDate) return false;
+        if (f.dateFrom && jobDate < f.dateFrom) return false;
+        if (f.dateTo && jobDate > f.dateTo) return false;
+    }
+
+    // 7. Fritextsökning
+    if (ignoreField !== "search" && searchLower) {
+        const haystack = [
+            job["Nr"],
+            job["Rubrik"],
+            job["Jobb-beskrivning"],
+            job["Adress"],
+            job["Huskod"],
+            job["Område"],
+            job["Distrikt"],
+            job["Fastighetsskötare"],
+            job["Bovärd"],
+            job["Bovärd Namn"],
+            job["Person"],
+            job["Typ"],
+            job["Hyresavi nr"]
+        ]
+            .join(" ")
+            .toLowerCase();
+
+        if (!haystack.includes(searchLower)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
-function populateStatusSelect() {
+function populateFilterOptions() {
+    const jobsForCaretaker = state.allJobs.filter((j) => doesJobMatchFilters(j, "caretaker"));
+    populateSelectWithCounts(
+        els.filterCaretaker,
+        jobsForCaretaker,
+        "Fastighetsskötare",
+        `Alla fastighetsskötare (${jobsForCaretaker.length.toLocaleString("sv-SE")})`,
+        state.filters.caretaker,
+        false
+    );
+
+    const jobsForStatus = state.allJobs.filter((j) => doesJobMatchFilters(j, "status"));
+    populateStatusSelect(jobsForStatus);
+
+    const jobsForType = state.allJobs.filter((j) => doesJobMatchFilters(j, "type"));
+    populateSelectWithCounts(
+        els.filterType,
+        jobsForType,
+        "Typ",
+        `Alla typer (${jobsForType.length.toLocaleString("sv-SE")})`,
+        state.filters.type,
+        true
+    );
+}
+
+function populateStatusSelect(baseJobs) {
     const counts = new Map();
     let activeCount = 0;
 
-    state.allJobs.forEach((job) => {
+    baseJobs.forEach((job) => {
         const st = (job["Status"] || "").trim();
         if (st) {
             counts.set(st, (counts.get(st) || 0) + 1);
@@ -587,13 +684,15 @@ function populateStatusSelect() {
 
     const allOpt = document.createElement("option");
     allOpt.value = "";
-    allOpt.textContent = `Alla statusar (${state.allJobs.length.toLocaleString("sv-SE")})`;
+    allOpt.textContent = `Alla statusar (${baseJobs.length.toLocaleString("sv-SE")})`;
     els.filterStatus.appendChild(allOpt);
 
-    const activeOpt = document.createElement("option");
-    activeOpt.value = "__ACTIVE__";
-    activeOpt.textContent = `⚡ Endast aktiva / Ej klara (${activeCount})`;
-    els.filterStatus.appendChild(activeOpt);
+    if (activeCount > 0 || currentValue === "__ACTIVE__") {
+        const activeOpt = document.createElement("option");
+        activeOpt.value = "__ACTIVE__";
+        activeOpt.textContent = `⚡ Endast aktiva / Ej klara (${activeCount.toLocaleString("sv-SE")})`;
+        els.filterStatus.appendChild(activeOpt);
+    }
 
     const sortedKeys = Array.from(counts.keys()).sort((a, b) => a.localeCompare(b, "sv"));
     sortedKeys.forEach((key) => {
@@ -603,14 +702,21 @@ function populateStatusSelect() {
         els.filterStatus.appendChild(opt);
     });
 
+    if (currentValue && currentValue !== "__ACTIVE__" && !counts.has(currentValue)) {
+        const zeroOpt = document.createElement("option");
+        zeroOpt.value = currentValue;
+        zeroOpt.textContent = `${currentValue} (0)`;
+        els.filterStatus.appendChild(zeroOpt);
+    }
+
     els.filterStatus.value = currentValue;
 }
 
-function populateSelectWithCounts(selectEl, columnKey, defaultLabel, currentValue, caseInsensitive = false) {
+function populateSelectWithCounts(selectEl, baseJobs, columnKey, defaultLabel, currentValue, caseInsensitive = false) {
     const counts = new Map();
     const displayLabels = new Map();
 
-    state.allJobs.forEach((job) => {
+    baseJobs.forEach((job) => {
         const raw = cleanFormulaZero(job[columnKey]);
         if (!raw) return;
         const key = caseInsensitive ? raw.toLowerCase() : raw;
@@ -638,16 +744,24 @@ function populateSelectWithCounts(selectEl, columnKey, defaultLabel, currentValu
         selectEl.appendChild(opt);
     });
 
-    selectEl.value = counts.has(currentValue) ? currentValue : "";
+    if (currentValue && !counts.has(currentValue)) {
+        const zeroOpt = document.createElement("option");
+        zeroOpt.value = currentValue;
+        zeroOpt.textContent = `${currentValue} (0)`;
+        selectEl.appendChild(zeroOpt);
+    }
+
+    selectEl.value = currentValue;
 }
 
 function renderKpiStrip() {
     els.kpiStrip.innerHTML = "";
+    const baseJobs = state.allJobs.filter((j) => doesJobMatchFilters(j, "status"));
 
-    // 1. Alla jobb
+    // 1. Alla jobb (inom nuvarande övriga filter)
     const allPill = createKpiPill(
         "Alla jobb",
-        state.allJobs.length,
+        baseJobs.length,
         !state.filters.status && !state.filters.acuteOnly,
         () => {
             state.filters.status = "";
@@ -660,8 +774,8 @@ function renderKpiStrip() {
     els.kpiStrip.appendChild(allPill);
 
     // 2. Aktiva (Ej klara: Ny + Pågår + Pausad)
-    const activeCount = state.allJobs.filter((j) => isJobOpenStatus(j["Status"])).length;
-    if (activeCount > 0) {
+    const activeCount = baseJobs.filter((j) => isJobOpenStatus(j["Status"])).length;
+    if (activeCount > 0 || state.filters.status === "__ACTIVE__") {
         const activePill = createKpiPill(
             "⚡ Aktiva (Ej klara)",
             activeCount,
@@ -676,8 +790,8 @@ function renderKpiStrip() {
     }
 
     // 3. Akuta jobb (om det finns några)
-    const acuteCount = state.allJobs.filter(isJobAcute).length;
-    if (acuteCount > 0) {
+    const acuteCount = baseJobs.filter(isJobAcute).length;
+    if (acuteCount > 0 || state.filters.acuteOnly) {
         const acutePill = createKpiPill(
             "🔥 Akuta",
             acuteCount,
@@ -695,7 +809,7 @@ function renderKpiStrip() {
     // 4. Per Status (sortera med aktiva statusar först: Ny, Pågår, Pausad, Klar, Klart)
     const statusOrder = ["Ny", "Pågår", "Pausad", "Klar", "Klart"];
     const statusCounts = new Map();
-    state.allJobs.forEach((job) => {
+    baseJobs.forEach((job) => {
         const st = (job["Status"] || "").trim();
         if (st) {
             statusCounts.set(st, (statusCounts.get(st) || 0) + 1);
@@ -804,82 +918,15 @@ function resetAllFilters() {
 }
 
 function applyFiltersAndRender() {
-    const f = state.filters;
-    const searchLower = f.search.toLowerCase();
-    const nrLower = f.nr.toLowerCase();
-
-    const filtered = state.allJobs.filter((job) => {
-        // 1. Fastighetsskötare
-        if (f.caretaker && cleanFormulaZero(job["Fastighetsskötare"]) !== f.caretaker) {
-            return false;
-        }
-
-        // 2. Status
-        if (f.status) {
-            if (f.status === "__ACTIVE__") {
-                if (!isJobOpenStatus(job["Status"])) return false;
-            } else if ((job["Status"] || "").trim() !== f.status) {
-                return false;
-            }
-        }
-
-        // 3. Typ (skiftlägesoberoende)
-        if (f.type && cleanFormulaZero(job["Typ"]).toLowerCase() !== f.type.toLowerCase()) {
-            return false;
-        }
-
-        // 4. Jobb-Nr
-        if (nrLower && !(job["Nr"] || "").toLowerCase().includes(nrLower)) {
-            return false;
-        }
-
-        // 5. Endast akuta
-        if (f.acuteOnly && !isJobAcute(job)) {
-            return false;
-        }
-
-        // 6. Skapad datum (Från / Till)
-        if (f.dateFrom || f.dateTo) {
-            const jobDate = normalizeDateString(job["Skapad datum"]);
-            if (!jobDate) return false;
-            if (f.dateFrom && jobDate < f.dateFrom) return false;
-            if (f.dateTo && jobDate > f.dateTo) return false;
-        }
-
-        // 7. Fritextsökning
-        if (searchLower) {
-            const haystack = [
-                job["Nr"],
-                job["Rubrik"],
-                job["Jobb-beskrivning"],
-                job["Adress"],
-                job["Huskod"],
-                job["Område"],
-                job["Distrikt"],
-                job["Fastighetsskötare"],
-                job["Bovärd"],
-                job["Bovärd Namn"],
-                job["Person"],
-                job["Typ"],
-                job["Hyresavi nr"]
-            ]
-                .join(" ")
-                .toLowerCase();
-
-            if (!haystack.includes(searchLower)) {
-                return false;
-            }
-        }
-
-        return true;
-    });
+    const filtered = state.allJobs.filter((job) => doesJobMatchFilters(job, ""));
 
     // Sortering
-    filtered.sort((a, b) => compareJobs(a, b, f.sort));
+    filtered.sort((a, b) => compareJobs(a, b, state.filters.sort));
 
     state.filteredJobs = filtered;
     state.visibleCount = PAGE_SIZE;
 
+    populateFilterOptions();
     renderKpiStrip();
     renderActiveFilterToolbar();
     renderJobsList(false);
