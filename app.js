@@ -5,10 +5,10 @@
    ========================================================= */
 
 const SHEET_ID = "1l_nOEIaMlOuiyAec5ElWUj5kQajIlC6_EHJZhazx6HU";
-const SHEET_GID = "0";
+const SHEET_NAME = "Blad2";
 const PAGE_SIZE = 60;
 
-// Exakt kolumnordning enligt specifikation (32 kolumner)
+// Exakt kolumnordning enligt specifikation (42 kolumner inkl. Hyresavier)
 const COLUMNS = [
     "Nr",
     "Skapad datum",
@@ -41,11 +41,36 @@ const COLUMNS = [
     "S2",
     "S3",
     "Typ",
-    "Distrikt"
+    "Distrikt",
+    "Hyresavier::Fakturanr",
+    "Hyresavier::Namn",
+    "Hyresavier::Adress",
+    "Hyresavier::Postnr",
+    "Hyresavier::Postadress",
+    "Hyresavier::Tel 1",
+    "Hyresavier::Email",
+    "Hyresavier::Lägenhet nr",
+    "Hyresavier::Tillträdesdag",
+    "Hyresavier::Huskod"
 ];
 
-// Gruppering i detaljvyn (alla 32 kolumner täcks)
+// Gruppering i detaljvyn (alla 42 kolumner täcks)
 const DETAIL_GROUPS = [
+    {
+        title: "Hyresavi & Hyresgäst (Hyresavier)",
+        fields: [
+            { key: "Hyresavier::Namn", full: true },
+            { key: "Hyresavier::Adress", full: true },
+            { key: "Hyresavier::Postnr" },
+            { key: "Hyresavier::Postadress" },
+            { key: "Hyresavier::Tel 1", type: "tel" },
+            { key: "Hyresavier::Email", type: "email" },
+            { key: "Hyresavier::Lägenhet nr" },
+            { key: "Hyresavier::Huskod" },
+            { key: "Hyresavier::Tillträdesdag" },
+            { key: "Hyresavier::Fakturanr" }
+        ]
+    },
     {
         title: "Grundinfo & Status",
         fields: [
@@ -346,7 +371,7 @@ async function loadSheetData() {
 }
 
 async function fetchViaCsv() {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}&_=${Date.now()}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}&_=${Date.now()}`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) {
         throw new Error("HTTP " + res.status);
@@ -432,7 +457,7 @@ function fetchViaGvizJsonp() {
             reject(new Error("Kunde inte ladda Google Sheet."));
         };
 
-        script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${SHEET_GID}&tqx=out:json;responseHandler:${callbackName}&_=${Date.now()}`;
+        script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json;responseHandler:${callbackName}&_=${Date.now()}`;
         document.body.appendChild(script);
     });
 }
@@ -612,7 +637,7 @@ function doesJobMatchFilters(job, ignoreField = "") {
         if (f.dateTo && jobDate > f.dateTo) return false;
     }
 
-    // 7. Fritextsökning
+    // 7. Fritextsökning (inkl. Hyresavier-kolumner)
     if (ignoreField !== "search" && searchLower) {
         const haystack = [
             job["Nr"],
@@ -627,7 +652,16 @@ function doesJobMatchFilters(job, ignoreField = "") {
             job["Bovärd Namn"],
             job["Person"],
             job["Typ"],
-            job["Hyresavi nr"]
+            job["Hyresavi nr"],
+            job["Hyresavier::Fakturanr"],
+            job["Hyresavier::Namn"],
+            job["Hyresavier::Adress"],
+            job["Hyresavier::Postnr"],
+            job["Hyresavier::Postadress"],
+            job["Hyresavier::Tel 1"],
+            job["Hyresavier::Email"],
+            job["Hyresavier::Lägenhet nr"],
+            job["Hyresavier::Huskod"]
         ]
             .join(" ")
             .toLowerCase();
@@ -1150,18 +1184,29 @@ function createJobCardElement(job) {
     const descText = cleanFormulaZero(job["Jobb-beskrivning"]);
     const caretakerText = cleanFormulaZero(job["Fastighetsskötare"]) || "Ej tilldelad";
 
+    const streetAddress = cleanFormulaZero(job["Hyresavier::Adress"]) || cleanFormulaZero(job["Adress"]);
+    const cityAddress = cleanFormulaZero(job["Hyresavier::Postadress"]) || cleanFormulaZero(job["Distrikt"]);
+    const omradeVal = cleanFormulaZero(job["Område"]) || cleanFormulaZero(job["Hyresavier::Huskod"]) || cleanFormulaZero(job["Huskod"]);
+
     const addressParts = [
-        cleanFormulaZero(job["Adress"]),
-        cleanFormulaZero(job["Område"]) ? `Omr ${cleanFormulaZero(job["Område"])}` : "",
-        cleanFormulaZero(job["Distrikt"])
+        streetAddress,
+        cityAddress,
+        !streetAddress && omradeVal ? `Omr ${omradeVal}` : ""
     ].filter(Boolean);
     const addressText = addressParts.join(" · ") || "—";
 
+    const tenantName = cleanFormulaZero(job["Hyresavier::Namn"]) || cleanFormulaZero(job["Person"]);
     const bovardText = cleanFormulaZero(job["Bovärd Namn"]) || cleanFormulaZero(job["Bovärd"]) || "—";
-    const exactLocation =
-        cleanFormulaZero(job["Var mer exakt?"]) ||
-        (cleanFormulaZero(job["Huskod"]) ? `Huskod ${cleanFormulaZero(job["Huskod"])}` : "") ||
-        (cleanFormulaZero(job["Hyresavi nr"]) ? `Avi ${cleanFormulaZero(job["Hyresavi nr"])}` : "—");
+    const huskodVal = cleanFormulaZero(job["Hyresavier::Huskod"]) || cleanFormulaZero(job["Huskod"]) || cleanFormulaZero(job["Område"]);
+    const lghVal = cleanFormulaZero(job["Hyresavier::Lägenhet nr"]);
+
+    const locParts = [
+        cleanFormulaZero(job["Var mer exakt?"]),
+        lghVal ? `Lgh ${lghVal}` : "",
+        huskodVal ? `Hus ${huskodVal}` : "",
+        tenantName ? `👤 ${tenantName}` : ""
+    ].filter(Boolean);
+    const exactLocation = locParts.join(" · ") || (cleanFormulaZero(job["Hyresavi nr"]) ? `Avi ${cleanFormulaZero(job["Hyresavi nr"])}` : "—");
 
     card.innerHTML = `
         <div class="job-card-top">
@@ -1185,11 +1230,11 @@ function createJobCardElement(job) {
                 <span class="meta-value">🔧 ${escapeHtml(caretakerText)}</span>
             </div>
             <div class="meta-item">
-                <span class="meta-label">Adress / Område</span>
+                <span class="meta-label">Adress / Ort</span>
                 <span class="meta-value">📍 ${escapeHtml(addressText)}</span>
             </div>
             <div class="meta-item">
-                <span class="meta-label">Plats / Huskod / Avi</span>
+                <span class="meta-label">Hyresgäst / Hus / Lgh</span>
                 <span class="meta-value">🏢 ${escapeHtml(exactLocation)}</span>
             </div>
             <div class="meta-item">
@@ -1231,16 +1276,31 @@ function openJobModal(job) {
     `;
 
     els.modalTitle.textContent = cleanFormulaZero(job["Rubrik"]) || "Jobb " + nrText;
+    const modalAddress = cleanFormulaZero(job["Hyresavier::Adress"]) || cleanFormulaZero(job["Adress"]);
+    const modalCity = cleanFormulaZero(job["Hyresavier::Postadress"]) || cleanFormulaZero(job["Distrikt"]);
+    const modalHuskod = cleanFormulaZero(job["Hyresavier::Huskod"]) || cleanFormulaZero(job["Område"]);
+
     const subParts = [
         job["Skapad datum"] ? `Skapad ${job["Skapad datum"]}` : "",
-        cleanFormulaZero(job["Adress"]),
-        cleanFormulaZero(job["Område"]) ? `Område ${cleanFormulaZero(job["Område"])}` : "",
-        cleanFormulaZero(job["Distrikt"])
+        modalAddress,
+        modalCity,
+        modalHuskod ? `Hus/Omr ${modalHuskod}` : ""
     ].filter(Boolean);
     els.modalSubtitle.textContent = subParts.join(" · ");
 
-    // Snabbknappar för mobil (Ring skötare, Ring bovärd, Karta)
+    // Snabbknappar för mobil (Ring hyresgäst, Ring skötare, Ring bovärd, Karta)
     els.modalQuickActions.innerHTML = "";
+
+    const tenantPhone = formatSwedishPhone(job["Hyresavier::Tel 1"]);
+    if (tenantPhone) {
+        const tenantLabel = cleanFormulaZero(job["Hyresavier::Namn"]) || tenantPhone;
+        els.modalQuickActions.appendChild(
+            createActionPill(
+                `📞 Hyresgäst (${tenantLabel})`,
+                `tel:${tenantPhone.replace(/[^\d+]/g, "")}`
+            )
+        );
+    }
 
     const caretakerPhone = formatSwedishPhone(job["Fastighetsskötare Telefon"]);
     if (caretakerPhone) {
@@ -1260,7 +1320,11 @@ function openJobModal(job) {
         );
     }
 
-    const addressQuery = [cleanFormulaZero(job["Adress"]), cleanFormulaZero(job["Distrikt"])].filter(Boolean).join(", ");
+    const addressQuery = [
+        modalAddress,
+        cleanFormulaZero(job["Hyresavier::Postnr"]),
+        modalCity
+    ].filter(Boolean).join(" ");
     if (addressQuery) {
         els.modalQuickActions.appendChild(
             createActionPill("📍 Öppna i Karta", `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressQuery)}`, true)
