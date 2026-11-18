@@ -21,11 +21,11 @@ FAKTA & LÄNKAR FÖR AB-HEM:
 
 const AI_MODELS = {
     gemini: [
-        { value: "gemini-2.5-flash", label: "gemini-2.5-flash (Standard – Gratis kvot)" },
-        { value: "gemini-2.5-flash-lite", label: "gemini-2.5-flash-lite (Snabb – Gratis kvot)" },
-        { value: "gemini-flash-latest", label: "gemini-flash-latest (Alltid senaste Flash)" },
+        { value: "gemini-3.8-flash", label: "gemini-3.8-flash (Standard & Snabb – Gratis kvot)" },
+        { value: "gemini-3.8-flash-lite", label: "gemini-3.8-flash-lite (Ultra-snabb – Gratis kvot)" },
         { value: "gemini-3-flash-preview", label: "gemini-3-flash-preview (Gemini 3 Flash)" },
-        { value: "gemini-2.5-pro", label: "gemini-2.5-pro (Avancerad)" }
+        { value: "gemini-3.8-pro", label: "gemini-3.8-pro (Avancerad)" },
+        { value: "gemini-flash-latest", label: "gemini-flash-latest (Alltid senaste Flash)" }
     ],
     openai: [
         { value: "gpt-4o-mini", label: "gpt-4o-mini (Rekommenderad – Snabb)" },
@@ -301,7 +301,7 @@ function initKnowledgeBase() {
                 chatState.kbFiles = parsed;
             }
         }
-    } catch (_) {}
+    } catch (_) { }
     renderKbFilesList();
     updateProviderUI();
 }
@@ -898,7 +898,7 @@ async function transcribeAudioWithGemini(audioBlob, apiKey) {
         reader.readAsDataURL(audioBlob);
     });
 
-    const activeModel = chatState.verifiedGeminiModel || els.aiModel.value || "gemini-3-flash-preview";
+    const activeModel = chatState.verifiedGeminiModel || els.aiModel.value || "gemini-3.8-flash";
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(activeModel)}:generateContent?key=${encodeURIComponent(apiKey)}`;
     const res = await fetch(url, {
         method: "POST",
@@ -1367,13 +1367,14 @@ async function discoverGeminiModels(apiKey) {
 
     // Prioritera standardmodeller med gratis kvot (Free Tier) först
     const freeTierPriority = [
-        "gemini-2.5-flash",
-        "gemini-2.5-flash-lite",
+        "gemini-3.8-flash",
+        "gemini-3.8-flash-lite",
         "gemini-flash-latest",
-        "gemini-flash-lite-latest",
         "gemini-3-flash-preview",
         "gemini-3.1-flash-lite-preview",
-        "gemini-2.5-pro"
+        "gemini-3.8-pro",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite"
     ];
 
     list.sort((a, b) => {
@@ -1418,8 +1419,7 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
                 model &&
                     !model.includes("image") &&
                     !model.includes("2.0") &&
-                    !model.includes("1.5") &&
-                    !model.includes("3.8")
+                    !model.includes("1.5")
                     ? [model]
                     : [];
 
@@ -1427,16 +1427,17 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
                 new Set([
                     ...safeSelected,
                     ...discovered,
+                    "gemini-3.8-flash",
+                    "gemini-3.8-flash-lite",
                     "gemini-3-flash-preview",
-                    "gemini-flash-latest",
-                    "gemini-2.5-flash-lite"
+                    "gemini-flash-latest"
                 ])
             );
         }
 
         const errors = [];
 
-        for (const candidateModel of candidateModels.slice(0, 4)) {
+        for (const candidateModel of candidateModels.slice(0, 6)) {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), 12000);
             try {
@@ -1481,7 +1482,9 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
                 }
             }
         }
-        throw new Error(errors[0] || "Kunde inte ansluta till Gemini API.");
+        // Om fel berodde på gamla pensionerade modeller, visa sista eller mest relevanta felet
+        const nonDepError = errors.find((er) => !er.includes("no longer available") && !er.includes("not found"));
+        throw new Error(nonDepError || errors[errors.length - 1] || errors[0] || "Kunde inte ansluta till Gemini API.");
     }
 
     if (provider === "openai") {
