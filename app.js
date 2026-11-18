@@ -1,126 +1,90 @@
 /* =========================================================
    AB-HEM · JOBS – APP LOGIC & GOOGLE SHEETS CONNECTOR
-   Sheet ID: 1l_nOEIaMlOuiyAec5ElWUj5kQajIlC6_EHJZhazx6HU (gid=0)
-   Optimerad för 7 600+ rader på mobil
+   Sheet ID: 1l_nOEIaMlOuiyAec5ElWUj5kQajIlC6_EHJZhazx6HU
+   Anpassad för de 29 kolumnerna och enbart öppna jobb
    ========================================================= */
 
 const SHEET_ID = "1l_nOEIaMlOuiyAec5ElWUj5kQajIlC6_EHJZhazx6HU";
-const SHEET_NAME = "Blad2";
+const SHEET_GID = "0";
 const PAGE_SIZE = 60;
 
-// Exakt kolumnordning enligt specifikation (42 kolumner inkl. Hyresavier)
+// Exakt kolumnordning enligt den nya strukturen i Google Sheet (29 kolumner)
 const COLUMNS = [
     "Nr",
+    "Status",
+    "Typ",
     "Skapad datum",
-    "Bovärd",
+    "Avslutad",
     "Rubrik",
     "Jobb-beskrivning",
     "Hyresavi nr",
     "Huskod",
     "Var mer exakt?",
-    "Person",
-    "Start datum",
-    "Slut datum",
-    "Firmanamn",
-    "Bovärds telefon",
     "Akut?",
-    "Prisförslag",
-    "Timförslag",
-    "Adress",
-    "F namn",
     "Fastighetsskötare",
     "Fastighetsskötare Email",
     "Fastighetsskötare Telefon",
+    "Bovärd",
     "Bovärd Email",
     "Bovärd Namn",
-    "Antal 110",
-    "Område",
-    "Status",
-    "Avslutad",
-    "S1",
-    "S2",
-    "S3",
-    "Typ",
-    "Distrikt",
-    "Hyresavier::Fakturanr",
+    "Hyresavier::Lägenhetskod",
+    "Bovärd Telefon",
     "Hyresavier::Namn",
     "Hyresavier::Adress",
+    "Hyresavier::Lgh.nr",
     "Hyresavier::Postnr",
     "Hyresavier::Postadress",
     "Hyresavier::Tel 1",
     "Hyresavier::Email",
-    "Hyresavier::Lägenhet nr",
     "Hyresavier::Tillträdesdag",
-    "Hyresavier::Huskod"
+    "Hyresavier::Månadskod",
+    "Hyresavier::Utflyttningsdag"
 ];
 
-// Gruppering i detaljvyn (alla 42 kolumner täcks)
+// Gruppering i detaljvyn (alla 29 kolumner täcks)
 const DETAIL_GROUPS = [
     {
-        title: "Hyresavi & Hyresgäst (Hyresavier)",
+        title: "Hyresgäst & Lägenhet (Hyresavier)",
         fields: [
             { key: "Hyresavier::Namn", full: true },
             { key: "Hyresavier::Adress", full: true },
             { key: "Hyresavier::Postnr" },
             { key: "Hyresavier::Postadress" },
+            { key: "Hyresavier::Lgh.nr" },
+            { key: "Hyresavier::Lägenhetskod" },
             { key: "Hyresavier::Tel 1", type: "tel" },
             { key: "Hyresavier::Email", type: "email" },
-            { key: "Hyresavier::Lägenhet nr" },
-            { key: "Hyresavier::Huskod" },
             { key: "Hyresavier::Tillträdesdag" },
-            { key: "Hyresavier::Fakturanr" }
+            { key: "Hyresavier::Utflyttningsdag" },
+            { key: "Hyresavier::Månadskod" },
+            { key: "Hyresavi nr" }
         ]
     },
     {
         title: "Grundinfo & Status",
         fields: [
             { key: "Nr" },
-            { key: "Skapad datum" },
             { key: "Status" },
-            { key: "Avslutad" },
-            { key: "Akut?" },
             { key: "Typ" },
+            { key: "Akut?" },
+            { key: "Skapad datum" },
+            { key: "Avslutad" },
+            { key: "Huskod" },
+            { key: "Var mer exakt?" },
             { key: "Rubrik", full: true },
             { key: "Jobb-beskrivning", full: true }
         ]
     },
     {
-        title: "Plats & Fastighet",
-        fields: [
-            { key: "Adress", full: true },
-            { key: "Var mer exakt?", full: true },
-            { key: "Huskod" },
-            { key: "Område" },
-            { key: "Distrikt" },
-            { key: "Hyresavi nr" },
-            { key: "Antal 110" }
-        ]
-    },
-    {
-        title: "Fastighetsskötare, Bovärd & Kontakt",
+        title: "Fastighetsskötare & Bovärd",
         fields: [
             { key: "Fastighetsskötare" },
             { key: "Fastighetsskötare Telefon", type: "tel" },
             { key: "Fastighetsskötare Email", type: "email", full: true },
-            { key: "Bovärd", full: true },
             { key: "Bovärd Namn" },
-            { key: "Bovärds telefon", type: "tel" },
+            { key: "Bovärd Telefon", type: "tel" },
             { key: "Bovärd Email", type: "email", full: true },
-            { key: "Person" },
-            { key: "Firmanamn" },
-            { key: "F namn" }
-        ]
-    },
-    {
-        title: "Tid, Ekonomi & Kodfält",
-        fields: [
-            { key: "Start datum" },
-            { key: "Slut datum" },
-            { key: "Prisförslag" },
-            { key: "Timförslag" },
-            { key: "S1" },
-            { key: "S2" },
-            { key: "S3" }
+            { key: "Bovärd", full: true }
         ]
     }
 ];
@@ -131,7 +95,6 @@ const state = {
     filteredJobs: [],
     visibleCount: PAGE_SIZE,
     selectedJob: null,
-    isDemoMode: false,
     filters: {
         search: "",
         caretaker: "",
@@ -166,7 +129,6 @@ function cacheElements() {
 
     els.accessBanner = document.getElementById("access-banner");
     els.btnRetrySheet = document.getElementById("btn-retry-sheet");
-    els.btnLoadDemo = document.getElementById("btn-load-demo");
 
     els.filterPanel = document.getElementById("filter-panel");
     els.filterSearch = document.getElementById("filter-search");
@@ -219,7 +181,7 @@ function bindEvents() {
         els.btnRetrySheet.addEventListener("click", () => loadSheetData());
     }
 
-    // Sökfält (med lätt debounce för 7 600+ rader)
+    // Sökfält
     let searchTimer = null;
     els.filterSearch.addEventListener("input", (e) => {
         const val = e.target.value.trim();
@@ -228,7 +190,7 @@ function bindEvents() {
         searchTimer = setTimeout(() => {
             state.filters.search = val;
             applyFiltersAndRender();
-        }, 120);
+        }, 80);
     });
 
     els.btnClearSearch.addEventListener("click", () => {
@@ -261,7 +223,7 @@ function bindEvents() {
         nrTimer = setTimeout(() => {
             state.filters.nr = val;
             applyFiltersAndRender();
-        }, 100);
+        }, 80);
     });
 
     // Datumfilter
@@ -350,15 +312,13 @@ function bindEvents() {
 
 async function loadSheetData() {
     setLoading(true);
-    els.syncStatus.textContent = "Läser in jobb från Google Sheet…";
+    els.syncStatus.textContent = "Läser in öppna jobb från Google Sheet…";
 
     try {
-        // 1. Försök med direkt CSV-hämtning (snabbast för 7 600+ rader)
         const csvJobs = await fetchViaCsv();
         onSheetLoaded(csvJobs);
     } catch (csvErr) {
         try {
-            // 2. Reservmetod: JSONP via Google Visualization API
             const jsonpJobs = await fetchViaGvizJsonp();
             onSheetLoaded(jsonpJobs);
         } catch (jsonpErr) {
@@ -371,7 +331,7 @@ async function loadSheetData() {
 }
 
 async function fetchViaCsv() {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}&_=${Date.now()}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}&_=${Date.now()}`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) {
         throw new Error("HTTP " + res.status);
@@ -402,12 +362,12 @@ async function fetchViaCsv() {
             const colName = COLUMNS[c];
             const val = (row[headerIndexMap[c]] || "").trim();
             job[colName] = val;
-            if (val !== "" && val !== "0") {
+            if (isMeaningfulValue(val)) {
                 hasMeaningfulValue = true;
             }
         }
 
-        if (hasMeaningfulValue && job["Nr"]) {
+        if (hasMeaningfulValue && (job["Nr"] || job["Rubrik"] || job["Jobb-beskrivning"])) {
             jobs.push(job);
         }
     }
@@ -426,7 +386,7 @@ function fetchViaGvizJsonp() {
                 cleanup();
                 reject(new Error("Timeout vid hämtning av Google Sheet."));
             }
-        }, 20000);
+        }, 15000);
 
         function cleanup() {
             clearTimeout(timeout);
@@ -457,7 +417,7 @@ function fetchViaGvizJsonp() {
             reject(new Error("Kunde inte ladda Google Sheet."));
         };
 
-        script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json;responseHandler:${callbackName}&_=${Date.now()}`;
+        script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${SHEET_GID}&tqx=out:json;responseHandler:${callbackName}&_=${Date.now()}`;
         document.body.appendChild(script);
     });
 }
@@ -493,12 +453,12 @@ function parseGvizTable(table) {
             const colName = COLUMNS[c];
             const val = getCellDisplayValue(rowCells[headerIndexMap[c]]);
             job[colName] = val;
-            if (val !== "" && val !== "0") {
+            if (isMeaningfulValue(val)) {
                 hasMeaningfulValue = true;
             }
         }
 
-        if (hasMeaningfulValue && job["Nr"]) {
+        if (hasMeaningfulValue && (job["Nr"] || job["Rubrik"] || job["Jobb-beskrivning"])) {
             jobs.push(job);
         }
     }
@@ -572,9 +532,8 @@ function onSheetLoaded(jobs) {
     els.accessBanner.hidden = true;
 
     const now = new Date().toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
-    els.syncStatus.textContent = `Live · ${jobs.length.toLocaleString("sv-SE")} jobb · Uppdaterad ${now}`;
+    els.syncStatus.textContent = `Live · ${jobs.length.toLocaleString("sv-SE")} öppna jobb · Uppdaterad ${now}`;
 
-    populateFilterOptions();
     applyFiltersAndRender();
 }
 
@@ -594,23 +553,21 @@ function doesJobMatchFilters(job, ignoreField = "") {
 
     // 1. Fastighetsskötare
     if (ignoreField !== "caretaker" && f.caretaker) {
-        if (cleanFormulaZero(job["Fastighetsskötare"]) !== f.caretaker) {
+        if (cleanEmptyValue(job["Fastighetsskötare"]) !== f.caretaker) {
             return false;
         }
     }
 
     // 2. Status
     if (ignoreField !== "status" && f.status) {
-        if (f.status === "__ACTIVE__") {
-            if (!isJobOpenStatus(job["Status"])) return false;
-        } else if ((job["Status"] || "").trim() !== f.status) {
+        if ((job["Status"] || "").trim() !== f.status) {
             return false;
         }
     }
 
     // 3. Typ (skiftlägesoberoende)
     if (ignoreField !== "type" && f.type) {
-        if (cleanFormulaZero(job["Typ"]).toLowerCase() !== f.type.toLowerCase()) {
+        if (cleanEmptyValue(job["Typ"]).toLowerCase() !== f.type.toLowerCase()) {
             return false;
         }
     }
@@ -637,31 +594,28 @@ function doesJobMatchFilters(job, ignoreField = "") {
         if (f.dateTo && jobDate > f.dateTo) return false;
     }
 
-    // 7. Fritextsökning (inkl. Hyresavier-kolumner)
+    // 7. Fritextsökning (söker i alla relevanta fält inkl. Hyresavier)
     if (ignoreField !== "search" && searchLower) {
         const haystack = [
             job["Nr"],
             job["Rubrik"],
             job["Jobb-beskrivning"],
-            job["Adress"],
+            job["Hyresavi nr"],
             job["Huskod"],
-            job["Område"],
-            job["Distrikt"],
+            job["Var mer exakt?"],
             job["Fastighetsskötare"],
             job["Bovärd"],
             job["Bovärd Namn"],
-            job["Person"],
             job["Typ"],
-            job["Hyresavi nr"],
-            job["Hyresavier::Fakturanr"],
+            job["Hyresavier::Lägenhetskod"],
             job["Hyresavier::Namn"],
             job["Hyresavier::Adress"],
+            job["Hyresavier::Lgh.nr"],
             job["Hyresavier::Postnr"],
             job["Hyresavier::Postadress"],
             job["Hyresavier::Tel 1"],
             job["Hyresavier::Email"],
-            job["Hyresavier::Lägenhet nr"],
-            job["Hyresavier::Huskod"]
+            job["Hyresavier::Månadskod"]
         ]
             .join(" ")
             .toLowerCase();
@@ -701,15 +655,11 @@ function populateFilterOptions() {
 
 function populateStatusSelect(baseJobs) {
     const counts = new Map();
-    let activeCount = 0;
 
     baseJobs.forEach((job) => {
         const st = (job["Status"] || "").trim();
         if (st) {
             counts.set(st, (counts.get(st) || 0) + 1);
-        }
-        if (isJobOpenStatus(st)) {
-            activeCount++;
         }
     });
 
@@ -721,14 +671,16 @@ function populateStatusSelect(baseJobs) {
     allOpt.textContent = `Alla statusar (${baseJobs.length.toLocaleString("sv-SE")})`;
     els.filterStatus.appendChild(allOpt);
 
-    if (activeCount > 0 || currentValue === "__ACTIVE__") {
-        const activeOpt = document.createElement("option");
-        activeOpt.value = "__ACTIVE__";
-        activeOpt.textContent = `⚡ Endast aktiva / Ej klara (${activeCount.toLocaleString("sv-SE")})`;
-        els.filterStatus.appendChild(activeOpt);
-    }
+    const statusOrder = ["Ny", "Pågår", "Pausad"];
+    const sortedKeys = Array.from(counts.keys()).sort((a, b) => {
+        const idxA = statusOrder.indexOf(a);
+        const idxB = statusOrder.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b, "sv");
+    });
 
-    const sortedKeys = Array.from(counts.keys()).sort((a, b) => a.localeCompare(b, "sv"));
     sortedKeys.forEach((key) => {
         const opt = document.createElement("option");
         opt.value = key;
@@ -736,7 +688,7 @@ function populateStatusSelect(baseJobs) {
         els.filterStatus.appendChild(opt);
     });
 
-    if (currentValue && currentValue !== "__ACTIVE__" && !counts.has(currentValue)) {
+    if (currentValue && !counts.has(currentValue)) {
         const zeroOpt = document.createElement("option");
         zeroOpt.value = currentValue;
         zeroOpt.textContent = `${currentValue} (0)`;
@@ -751,7 +703,7 @@ function populateSelectWithCounts(selectEl, baseJobs, columnKey, defaultLabel, c
     const displayLabels = new Map();
 
     baseJobs.forEach((job) => {
-        const raw = cleanFormulaZero(job[columnKey]);
+        const raw = cleanEmptyValue(job[columnKey]);
         if (!raw) return;
         const key = caseInsensitive ? raw.toLowerCase() : raw;
         counts.set(key, (counts.get(key) || 0) + 1);
@@ -792,9 +744,9 @@ function renderKpiStrip() {
     els.kpiStrip.innerHTML = "";
     const baseJobs = state.allJobs.filter((j) => doesJobMatchFilters(j, "status"));
 
-    // 1. Alla jobb (inom nuvarande övriga filter)
+    // 1. Alla öppna jobb (inom nuvarande övriga filter)
     const allPill = createKpiPill(
-        "Alla jobb",
+        "Alla öppna",
         baseJobs.length,
         !state.filters.status && !state.filters.acuteOnly,
         () => {
@@ -807,23 +759,7 @@ function renderKpiStrip() {
     );
     els.kpiStrip.appendChild(allPill);
 
-    // 2. Aktiva (Ej klara: Ny + Pågår + Pausad)
-    const activeCount = baseJobs.filter((j) => isJobOpenStatus(j["Status"])).length;
-    if (activeCount > 0 || state.filters.status === "__ACTIVE__") {
-        const activePill = createKpiPill(
-            "⚡ Aktiva (Ej klara)",
-            activeCount,
-            state.filters.status === "__ACTIVE__",
-            () => {
-                state.filters.status = state.filters.status === "__ACTIVE__" ? "" : "__ACTIVE__";
-                els.filterStatus.value = state.filters.status;
-                applyFiltersAndRender();
-            }
-        );
-        els.kpiStrip.appendChild(activePill);
-    }
-
-    // 3. Akuta jobb (om det finns några)
+    // 2. Akuta jobb (om det finns några)
     const acuteCount = baseJobs.filter(isJobAcute).length;
     if (acuteCount > 0 || state.filters.acuteOnly) {
         const acutePill = createKpiPill(
@@ -840,8 +776,8 @@ function renderKpiStrip() {
         els.kpiStrip.appendChild(acutePill);
     }
 
-    // 4. Per Status (sortera med aktiva statusar först: Ny, Pågår, Pausad, Klar, Klart)
-    const statusOrder = ["Ny", "Pågår", "Pausad", "Klar", "Klart"];
+    // 3. Per Status (Ny, Pågår, Pausad)
+    const statusOrder = ["Ny", "Pågår", "Pausad"];
     const statusCounts = new Map();
     baseJobs.forEach((job) => {
         const st = (job["Status"] || "").trim();
@@ -1012,26 +948,27 @@ function normalizeDateString(raw) {
     return str;
 }
 
-function isJobOpenStatus(statusRaw) {
-    const s = String(statusRaw || "").trim().toLowerCase();
-    if (!s) return false;
-    return s !== "klar" && s !== "klart" && s !== "avslutad";
-}
-
 function isJobAcute(job) {
     const val = String(job["Akut?"] || "").trim().toLowerCase();
     return val === "ja" || val === "yes" || val === "true" || val === "1" || val === "akut";
 }
 
-function cleanFormulaZero(val) {
+function isMeaningfulValue(val) {
+    const s = String(val || "").trim().toLowerCase();
+    return s !== "" && s !== "0" && s !== "inget";
+}
+
+function cleanEmptyValue(val) {
     const s = String(val || "").trim();
-    return s === "0" ? "" : s;
+    if (s === "" || s === "0" || s.toLowerCase() === "inget") {
+        return "";
+    }
+    return s;
 }
 
 function formatSwedishPhone(rawPhone) {
-    const s = cleanFormulaZero(rawPhone);
+    const s = cleanEmptyValue(rawPhone);
     if (!s) return "";
-    // Om Google Sheets kapat inledande nolla på mobilnummer (t.ex. "761940018")
     if (/^[1-9]\d{7,9}$/.test(s)) {
         return "0" + s;
     }
@@ -1039,7 +976,7 @@ function formatSwedishPhone(rawPhone) {
 }
 
 function extractPhoneFromText(text) {
-    const s = cleanFormulaZero(text);
+    const s = cleanEmptyValue(text);
     if (!s) return "";
     const match = s.match(/(\+46|0)\d[\d\s-]{6,13}\d/);
     return match ? match[0].trim() : "";
@@ -1056,7 +993,7 @@ function getStatusClass(statusRaw) {
 }
 
 /* =========================================================
-   RENDERING: AKTIVA FILTER & JOBBLISTA (PAGINERAD FÖR 7 600+ RADER)
+   RENDERING: AKTIVA FILTER & JOBBLISTA
    ========================================================= */
 
 function renderActiveFilterToolbar() {
@@ -1067,8 +1004,7 @@ function renderActiveFilterToolbar() {
         chips.push({ label: `Skötare: ${f.caretaker}`, clear: () => { f.caretaker = ""; els.filterCaretaker.value = ""; } });
     }
     if (f.status) {
-        const statusLabel = f.status === "__ACTIVE__" ? "⚡ Endast aktiva" : `Status: ${f.status}`;
-        chips.push({ label: statusLabel, clear: () => { f.status = ""; els.filterStatus.value = ""; } });
+        chips.push({ label: `Status: ${f.status}`, clear: () => { f.status = ""; els.filterStatus.value = ""; } });
     }
     if (f.type) {
         chips.push({ label: `Typ: ${f.type}`, clear: () => { f.type = ""; els.filterType.value = ""; } });
@@ -1106,7 +1042,7 @@ function renderActiveFilterToolbar() {
         els.btnResetFilters.hidden = true;
     }
 
-    els.resultsCount.textContent = `Visar ${state.filteredJobs.length.toLocaleString("sv-SE")} av ${state.allJobs.length.toLocaleString("sv-SE")} jobb`;
+    els.resultsCount.textContent = `Visar ${state.filteredJobs.length.toLocaleString("sv-SE")} av ${state.allJobs.length.toLocaleString("sv-SE")} öppna jobb`;
     els.activeChips.innerHTML = "";
 
     chips.forEach((chip) => {
@@ -1179,34 +1115,34 @@ function createJobCardElement(job) {
     const createdText = job["Skapad datum"] || "Datum saknas";
     const statusText = job["Status"] || "Ej angiven";
     const statusClass = getStatusClass(statusText);
-    const typeText = cleanFormulaZero(job["Typ"]);
-    const titleText = cleanFormulaZero(job["Rubrik"]) || cleanFormulaZero(job["Jobb-beskrivning"]) || `Jobb ${nrText}`;
-    const descText = cleanFormulaZero(job["Jobb-beskrivning"]);
-    const caretakerText = cleanFormulaZero(job["Fastighetsskötare"]) || "Ej tilldelad";
+    const typeText = cleanEmptyValue(job["Typ"]);
+    const titleText = cleanEmptyValue(job["Rubrik"]) || cleanEmptyValue(job["Jobb-beskrivning"]) || `Jobb ${nrText}`;
+    const descText = cleanEmptyValue(job["Jobb-beskrivning"]);
+    const caretakerText = cleanEmptyValue(job["Fastighetsskötare"]) || "Ej tilldelad";
 
-    const streetAddress = cleanFormulaZero(job["Hyresavier::Adress"]) || cleanFormulaZero(job["Adress"]);
-    const cityAddress = cleanFormulaZero(job["Hyresavier::Postadress"]) || cleanFormulaZero(job["Distrikt"]);
-    const omradeVal = cleanFormulaZero(job["Område"]) || cleanFormulaZero(job["Hyresavier::Huskod"]) || cleanFormulaZero(job["Huskod"]);
+    const streetAddress = cleanEmptyValue(job["Hyresavier::Adress"]);
+    const cityAddress = cleanEmptyValue(job["Hyresavier::Postadress"]);
+    const lghKod = cleanEmptyValue(job["Hyresavier::Lägenhetskod"]);
+    const lghNr = cleanEmptyValue(job["Hyresavier::Lgh.nr"]);
+    const huskod = cleanEmptyValue(job["Huskod"]);
 
     const addressParts = [
         streetAddress,
         cityAddress,
-        !streetAddress && omradeVal ? `Omr ${omradeVal}` : ""
+        !streetAddress && huskod ? `Huskod ${huskod}` : ""
     ].filter(Boolean);
     const addressText = addressParts.join(" · ") || "—";
 
-    const tenantName = cleanFormulaZero(job["Hyresavier::Namn"]) || cleanFormulaZero(job["Person"]);
-    const bovardText = cleanFormulaZero(job["Bovärd Namn"]) || cleanFormulaZero(job["Bovärd"]) || "—";
-    const huskodVal = cleanFormulaZero(job["Hyresavier::Huskod"]) || cleanFormulaZero(job["Huskod"]) || cleanFormulaZero(job["Område"]);
-    const lghVal = cleanFormulaZero(job["Hyresavier::Lägenhet nr"]);
+    const tenantName = cleanEmptyValue(job["Hyresavier::Namn"]);
+    const bovardText = cleanEmptyValue(job["Bovärd Namn"]) || cleanEmptyValue(job["Bovärd"]) || "—";
 
     const locParts = [
-        cleanFormulaZero(job["Var mer exakt?"]),
-        lghVal ? `Lgh ${lghVal}` : "",
-        huskodVal ? `Hus ${huskodVal}` : "",
-        tenantName ? `👤 ${tenantName}` : ""
+        tenantName,
+        lghNr ? `Lgh ${lghNr}` : "",
+        lghKod ? `Kod ${lghKod}` : "",
+        cleanEmptyValue(job["Var mer exakt?"])
     ].filter(Boolean);
-    const exactLocation = locParts.join(" · ") || (cleanFormulaZero(job["Hyresavi nr"]) ? `Avi ${cleanFormulaZero(job["Hyresavi nr"])}` : "—");
+    const exactLocation = locParts.join(" · ") || (cleanEmptyValue(job["Hyresavi nr"]) ? `Avi ${cleanEmptyValue(job["Hyresavi nr"])}` : "—");
 
     card.innerHTML = `
         <div class="job-card-top">
@@ -1234,8 +1170,8 @@ function createJobCardElement(job) {
                 <span class="meta-value">📍 ${escapeHtml(addressText)}</span>
             </div>
             <div class="meta-item">
-                <span class="meta-label">Hyresgäst / Hus / Lgh</span>
-                <span class="meta-value">🏢 ${escapeHtml(exactLocation)}</span>
+                <span class="meta-label">Hyresgäst / Lägenhet</span>
+                <span class="meta-value">🏠 ${escapeHtml(exactLocation)}</span>
             </div>
             <div class="meta-item">
                 <span class="meta-label">Bovärd</span>
@@ -1256,7 +1192,7 @@ function createJobCardElement(job) {
 }
 
 /* =========================================================
-   MODAL / MOBIL DETALJVY (ALLA 32 KOLUMNER)
+   MODAL / MOBIL DETALJVY (ALLA 29 KOLUMNER)
    ========================================================= */
 
 function openJobModal(job) {
@@ -1266,7 +1202,7 @@ function openJobModal(job) {
     const statusText = job["Status"] || "Ej angiven";
     const statusClass = getStatusClass(statusText);
     const acute = isJobAcute(job);
-    const typeText = cleanFormulaZero(job["Typ"]);
+    const typeText = cleanEmptyValue(job["Typ"]);
 
     els.modalBadges.innerHTML = `
         <span class="nr-badge">${escapeHtml(nrText)}</span>
@@ -1275,16 +1211,16 @@ function openJobModal(job) {
         ${typeText ? `<span class="type-badge">${escapeHtml(typeText)}</span>` : ""}
     `;
 
-    els.modalTitle.textContent = cleanFormulaZero(job["Rubrik"]) || "Jobb " + nrText;
-    const modalAddress = cleanFormulaZero(job["Hyresavier::Adress"]) || cleanFormulaZero(job["Adress"]);
-    const modalCity = cleanFormulaZero(job["Hyresavier::Postadress"]) || cleanFormulaZero(job["Distrikt"]);
-    const modalHuskod = cleanFormulaZero(job["Hyresavier::Huskod"]) || cleanFormulaZero(job["Område"]);
+    els.modalTitle.textContent = cleanEmptyValue(job["Rubrik"]) || "Jobb " + nrText;
+    const modalAddress = cleanEmptyValue(job["Hyresavier::Adress"]);
+    const modalCity = cleanEmptyValue(job["Hyresavier::Postadress"]);
+    const modalLgh = cleanEmptyValue(job["Hyresavier::Lgh.nr"]);
 
     const subParts = [
         job["Skapad datum"] ? `Skapad ${job["Skapad datum"]}` : "",
         modalAddress,
-        modalCity,
-        modalHuskod ? `Hus/Omr ${modalHuskod}` : ""
+        modalLgh ? `Lgh ${modalLgh}` : "",
+        modalCity
     ].filter(Boolean);
     els.modalSubtitle.textContent = subParts.join(" · ");
 
@@ -1293,7 +1229,7 @@ function openJobModal(job) {
 
     const tenantPhone = formatSwedishPhone(job["Hyresavier::Tel 1"]);
     if (tenantPhone) {
-        const tenantLabel = cleanFormulaZero(job["Hyresavier::Namn"]) || tenantPhone;
+        const tenantLabel = cleanEmptyValue(job["Hyresavier::Namn"]) || tenantPhone;
         els.modalQuickActions.appendChild(
             createActionPill(
                 `📞 Hyresgäst (${tenantLabel})`,
@@ -1306,15 +1242,18 @@ function openJobModal(job) {
     if (caretakerPhone) {
         els.modalQuickActions.appendChild(
             createActionPill(
-                `📞 Skötare (${cleanFormulaZero(job["Fastighetsskötare"]) || caretakerPhone})`,
+                `📞 Skötare (${cleanEmptyValue(job["Fastighetsskötare"]) || caretakerPhone})`,
                 `tel:${caretakerPhone.replace(/[^\d+]/g, "")}`
             )
         );
     }
 
-    const bovardPhone = formatSwedishPhone(job["Bovärds telefon"]) || extractPhoneFromText(job["Bovärd"]);
+    const bovardPhone = formatSwedishPhone(job["Bovärd Telefon"]) || extractPhoneFromText(job["Bovärd"]);
     if (bovardPhone) {
-        const bovardName = cleanFormulaZero(job["Bovärd Namn"]) || cleanFormulaZero(job["Bovärd"]).replace(bovardPhone, "").trim() || bovardPhone;
+        const bovardName =
+            cleanEmptyValue(job["Bovärd Namn"]) ||
+            cleanEmptyValue(job["Bovärd"]).replace(bovardPhone, "").trim() ||
+            bovardPhone;
         els.modalQuickActions.appendChild(
             createActionPill(`📞 Bovärd (${bovardName})`, `tel:${bovardPhone.replace(/[^\d+]/g, "")}`)
         );
@@ -1322,12 +1261,18 @@ function openJobModal(job) {
 
     const addressQuery = [
         modalAddress,
-        cleanFormulaZero(job["Hyresavier::Postnr"]),
+        cleanEmptyValue(job["Hyresavier::Postnr"]),
         modalCity
-    ].filter(Boolean).join(" ");
+    ]
+        .filter(Boolean)
+        .join(" ");
     if (addressQuery) {
         els.modalQuickActions.appendChild(
-            createActionPill("📍 Öppna i Karta", `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressQuery)}`, true)
+            createActionPill(
+                "📍 Öppna i Karta",
+                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressQuery)}`,
+                true
+            )
         );
     }
 
@@ -1353,7 +1298,7 @@ function renderModalBody(job) {
     const showEmpty = els.toggleAllColumns.checked;
     els.modalBody.innerHTML = "";
 
-    const desc = cleanFormulaZero(job["Jobb-beskrivning"]);
+    const desc = cleanEmptyValue(job["Jobb-beskrivning"]);
     if (desc || showEmpty) {
         const descBox = document.createElement("div");
         descBox.className = "detail-description-box";
@@ -1367,8 +1312,7 @@ function renderModalBody(job) {
     DETAIL_GROUPS.forEach((group) => {
         const visibleFields = group.fields.filter((f) => {
             if (showEmpty) return true;
-            const raw = String(job[f.key] || "").trim();
-            return raw !== "" && raw !== "0";
+            return isMeaningfulValue(job[f.key]);
         });
 
         if (visibleFields.length === 0) return;
@@ -1386,10 +1330,11 @@ function renderModalBody(job) {
 
         visibleFields.forEach((field) => {
             let rawVal = String(job[field.key] || "").trim();
-            if (field.type === "tel" && rawVal && rawVal !== "0") {
+            const isEmpty = !isMeaningfulValue(rawVal);
+
+            if (!isEmpty && field.type === "tel") {
                 rawVal = formatSwedishPhone(rawVal);
             }
-            const isEmpty = rawVal === "" || rawVal === "0";
 
             const cell = document.createElement("div");
             cell.className = `detail-cell ${field.full ? "full-width" : ""} ${isEmpty ? "is-empty" : ""}`.trim();
@@ -1402,7 +1347,7 @@ function renderModalBody(job) {
             value.className = "detail-value";
 
             if (isEmpty) {
-                value.textContent = rawVal === "0" && showEmpty ? "0" : "—";
+                value.textContent = "—";
             } else if (field.type === "tel") {
                 value.innerHTML = `<a href="tel:${escapeHtml(rawVal.replace(/[^\d+]/g, ""))}">${escapeHtml(rawVal)}</a>`;
             } else if (field.type === "email") {
