@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#173c36">
+    <title>AB-Hem · Chatbot Demoversion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- =========================================================
+         DEMO PREVIEW PAGE (SIMULERAR AB-HEM.SE + INSTÄLLNINGSPANEL)
+         ========================================================= -->
+    <header class="demo-header">
+        <div class="demo-container demo-header-inner">
+            <div class="demo-logo">
+                <span class="demo-logo-badge">AB-Hem</span>
+                <span class="demo-logo-sub">Interaktiv Chatbot-demo</span>
+            </div>
+            <div class="demo-header-links">
+                <a href="https://ab-hem.se/lediga-bostader/" target="_blank" rel="noopener">Sökbara bostäder ↗</a>
+                <a href="https://ab-hem.se/kommuner/" target="_blank" rel="noopener">Var finns vi ↗</a>
+                <a href="https://ab-hem.se/hyres-pott/" target="_blank" rel="noopener">Hyres-pott ↗</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="demo-main">
+        <div class="demo-container">
+
+            <!-- HERO BANNER -->
+            <section class="demo-hero">
+                <div class="demo-eyebrow">Fristående Demoversion</div>
+                <h1>Testa AB-hems nya <span>Chatbot</span></h1>
+                <p>
+                    Chatten ligger öppen nere till höger (eller klicka på knappen nedan). Här i testpanelen kan du växla mellan den <strong>inbyggda lokala svarsmotorn</strong> och valfri <strong>AI-modell (Google Gemini, OpenAI eller Claude)</strong> samt testa olika kundfrågor.
+                </p>
+                <div class="demo-hero-actions">
+                    <button type="button" id="demo-open-chat" class="demo-btn demo-btn-white">
+                        Öppna chatten nu 💬
+                    </button>
+                    <button type="button" id="demo-reset-chat" class="demo-btn demo-btn-outline">
+                        Starta om konversationen
+                    </button>
+                </div>
+            </section>
+
+            <div class="demo-grid">
+
+                <!-- VÄNSTER: AI-INSTÄLLNINGAR (MOTSVARAR WORDPRESS ADMIN) -->
+                <section class="demo-card">
+                    <div class="demo-card-header">
+                        <span class="demo-tag">Motsvarar WordPress Admin</span>
+                        <h2>1. Välj svarsmotor / AI-modell</h2>
+                        <p>
+                            Testa hur boten svarar antingen med den inbyggda lokala svarsmotorn (kräver ingen nyckel) eller genom att koppla in en valbar AI-modell.
+                        </p>
+                    </div>
+
+                    <div class="demo-form">
+                        <div class="demo-field">
+                            <label for="ai-provider">Svarsmotor / AI-leverantör</label>
+                            <select id="ai-provider">
+                                <option value="local">⚡ Smart lokal svarsmotor (Inbyggd – 0 kr, ingen API-nyckel krävs)</option>
+                                <option value="gemini">✨ Google Gemini API (gemini-2.5-flash / gemini-2.5-pro)</option>
+                                <option value="openai">🤖 OpenAI API (gpt-4o-mini / gpt-4o)</option>
+                                <option value="anthropic">🧠 Anthropic Claude API (claude-3-5-haiku / claude-3-7-sonnet)</option>
+                            </select>
+                        </div>
+
+                        <div id="ai-model-wrap" class="demo-field" hidden>
+                            <label for="ai-model">Modell</label>
+                            <select id="ai-model"></select>
+                        </div>
+
+                        <div id="ai-key-wrap" class="demo-field" hidden>
+                            <label for="ai-api-key">API-nyckel (sparas endast lokalt i din webbläsare under testet)</label>
+                            <input type="password" id="ai-api-key" placeholder="Klistra in din API-nyckel här…" autocomplete="off">
+                            <small class="demo-hint">
+                                Om fältet lämnas tomt (eller vid fel) faller boten automatiskt tillbaka på den lokala svarsmotorn.
+                            </small>
+                        </div>
+
+                        <div class="demo-field">
+                            <label for="ai-system-prompt">Systemprompt & Kunskapsbas (skickas till vald AI-modell)</label>
+                            <textarea id="ai-system-prompt" rows="8"></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- HÖGER: TESTA FRÅGOR MED ETT KLICK -->
+                <section class="demo-card">
+                    <div class="demo-card-header">
+                        <span class="demo-tag">Snabbtest</span>
+                        <h2>2. Klicka på en testfråga</h2>
+                        <p>
+                            Klicka på någon av frågorna nedan för att skicka in den direkt till chatten och se hur AB-hem-boten svarar och länkar vidare:
+                        </p>
+                    </div>
+
+                    <div class="test-questions-list">
+                        <button type="button" class="test-q-btn" data-q="Har ni några lediga lägenheter i Norberg eller Kärrgruvan?">
+                            <strong>🏠 Bostad i specifik kommun</strong>
+                            <span>"Har ni några lediga lägenheter i Norberg eller Kärrgruvan?"</span>
+                        </button>
+
+                        <button type="button" class="test-q-btn" data-q="Hur fungerar Hyres-potten och hur mycket rabatt kan man få?">
+                            <strong>💚 Hyres-pott & rabatt</strong>
+                            <span>"Hur fungerar Hyres-potten och hur mycket rabatt kan man få?"</span>
+                        </button>
+
+                        <button type="button" class="test-q-btn" data-q="Hur är det att bo i Torsåker i Hofors kommun?">
+                            <strong>📍 Fråga om ort (t.ex. Torsåker / Storvik / Krylbo)</strong>
+                            <span>"Hur är det att bo i Torsåker i Hofors kommun?"</span>
+                        </button>
+
+                        <button type="button" class="test-q-btn" data-q="Mitt kylskåp har slutat fungera, hur gör jag en felanmälan?">
+                            <strong>🔧 Felanmälan för hyresgäst</strong>
+                            <span>"Mitt kylskåp har slutat fungera, hur gör jag en felanmälan?"</span>
+                        </button>
+
+                        <button type="button" class="test-q-btn" data-q="HJÄLP! Det sprutar vatten från ett rör i badrummet!">
+                            <strong>🚨 Akut jourärende</strong>
+                            <span>"HJÄLP! Det sprutar vatten från ett rör i badrummet!"</span>
+                        </button>
+
+                        <button type="button" class="test-q-btn" data-q="Vilka krav har ni för att man ska få hyra lägenhet hos er?">
+                            <strong>📋 Uthyrningspolicy & krav</strong>
+                            <span>"Vilka krav har ni för att man ska få hyra lägenhet hos er?"</span>
+                        </button>
+
+                        <button type="button" class="test-q-btn" data-q="Har ni möblerade lägenheter för företag?">
+                            <strong>🛋️ Möblerade lägenheter</strong>
+                            <span>"Har ni möblerade lägenheter för företag?"</span>
+                        </button>
+                    </div>
+                </section>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- =========================================================
+         AB-HEM CHATBOT WIDGET (.ab-chatbot)
+         ========================================================= -->
+    <div class="ab-chatbot" id="ab-chatbot">
+
+        <!-- CHATTFÖNSTER -->
+        <section class="ab-chat-window" id="ab-chat-window" aria-label="AB-hem kundtjänstchatt">
+            <!-- Header -->
+            <header class="ab-chat-header">
+                <div class="ab-chat-header-info">
+                    <div class="ab-chat-avatar">AB</div>
+                    <div>
+                        <h3 class="ab-chat-title">AB-hem Hjälpen</h3>
+                        <span class="ab-chat-subtitle" id="ab-chat-mode-badge">
+                            <span class="ab-online-dot"></span> Svarar direkt dygnet runt
+                        </span>
+                    </div>
+                </div>
+                <div class="ab-chat-header-actions">
+                    <button type="button" id="ab-chat-clear" class="ab-header-btn" title="Börja om chatten" aria-label="Börja om">
+                        ↻
+                    </button>
+                    <button type="button" id="ab-chat-close" class="ab-header-btn" title="Minimera chatten" aria-label="Stäng">
+                        ✕
+                    </button>
+                </div>
+            </header>
+
+            <!-- Meddelandelista -->
+            <div class="ab-chat-messages" id="ab-chat-messages" role="log" aria-live="polite"></div>
+
+            <!-- Snabbval (Quick Replies) -->
+            <div class="ab-chat-quick-bar" id="ab-chat-quick-bar">
+                <button type="button" class="ab-quick-chip" data-q="Lediga bostäder">🏠 Lediga bostäder</button>
+                <button type="button" class="ab-quick-chip" data-q="Vad är Hyres-potten?">💚 Hyres-pott</button>
+                <button type="button" class="ab-quick-chip" data-q="Jag vill göra en felanmälan">🔧 Felanmälan</button>
+                <button type="button" class="ab-quick-chip" data-q="Akut jour">🚨 Akut jour</button>
+                <button type="button" class="ab-quick-chip" data-q="Vilka kommuner finns ni i?">📍 Våra 17 kommuner</button>
+                <button type="button" class="ab-quick-chip" data-q="Vilka krav har ni för att hyra?">📋 Krav & Intresseanmälan</button>
+                <button type="button" class="ab-quick-chip" data-q="Hur kontaktar jag er?">📞 Kontakta oss</button>
+            </div>
+
+            <!-- Inmatningsfält -->
+            <form class="ab-chat-input-area" id="ab-chat-form">
+                <input
+                    type="text"
+                    id="ab-chat-input"
+                    placeholder="Skriv din fråga till AB-hem…"
+                    autocomplete="off"
+                >
+                <button type="submit" id="ab-chat-send" class="ab-send-btn" aria-label="Skicka">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </form>
+        </section>
+
+        <!-- FLYTANDE LAUNCHER-KNAPP -->
+        <button type="button" class="ab-chat-launcher" id="ab-chat-launcher" aria-expanded="true">
+            <span class="ab-launcher-icon">💬</span>
+            <span class="ab-launcher-text">Fråga AB-hem</span>
+        </button>
+
+    </div>
+
+    <script src="chatbot.js"></script>
+</body>
+</html>
+
