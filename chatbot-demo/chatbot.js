@@ -680,20 +680,33 @@ async function discoverGeminiModels(apiKey) {
         throw new Error(data?.error?.message || `Gemini Models HTTP ${res.status}`);
     }
     const list = (data.models || [])
-        .filter(
-            (m) =>
-                Array.isArray(m.supportedGenerationMethods) &&
-                m.supportedGenerationMethods.includes("generateContent") &&
-                String(m.name || "").includes("gemini")
-        )
+        .filter((m) => {
+            const name = String(m.name || "").toLowerCase();
+            const methods = m.supportedGenerationMethods || [];
+            return (
+                methods.includes("generateContent") &&
+                name.includes("gemini") &&
+                !name.includes("1.5") &&
+                !name.includes("1.0") &&
+                !name.includes("embedding") &&
+                !name.includes("imagen") &&
+                !name.includes("tts") &&
+                !name.includes("audio") &&
+                !name.includes("robotics") &&
+                !name.includes("computer-use")
+            );
+        })
         .map((m) => String(m.name).replace(/^models\//, ""));
 
-    // Sortera så att flash-modeller hamnar överst
+    // Prioritera stabila flash-modeller först
+    const priority = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-2.5-pro"];
     list.sort((a, b) => {
-        const aFlash = a.includes("flash") ? 0 : 1;
-        const bFlash = b.includes("flash") ? 0 : 1;
-        if (aFlash !== bFlash) return aFlash - bFlash;
-        return b.localeCompare(a);
+        const idxA = priority.indexOf(a);
+        const idxB = priority.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b);
     });
 
     return list;
@@ -701,42 +714,22 @@ async function discoverGeminiModels(apiKey) {
 
 async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, history }) {
     if (provider === "gemini") {
-        // Hämta tillgängliga modeller för nyckeln om vald modell ger 404
-        let candidateModels = Array.from(
-            new Set([
-                model,
-                "gemini-2.5-flash",
-                "gemini-2.0-flash",
-                "gemini-flash-latest",
-                "gemini-1.5-flash-latest",
-                "gemini-pro-latest"
-            ])
-        );
-
-        try {
-            const discovered = await discoverGeminiModels(apiKey);
-            if (discovered.length > 0) {
-                AI_MODELS.gemini = discovered.map((m) => ({ value: m, label: m }));
-                // Om nuvarande modell finns bland de upptäckta, behåll den först, annars ta första upptäckta
-                if (discovered.includes(model)) {
-                    candidateModels = [model, ...discovered.filter((d) => d !== model)];
-                } else {
-                    candidateModels = discovered;
-                }
-            }
-        } catch (discErr) {
-            // Om själva nyckeln är ogiltig kastar vi felet direkt
-            if (
-                String(discErr.message).includes("API_KEY_INVALID") ||
-                String(discErr.message).includes("API key not valid")
-            ) {
-                throw discErr;
-            }
+        // 1. Hämta exakt vilka modeller som finns på nyckeln via ListModels
+        const discovered = await discoverGeminiModels(apiKey);
+        if (discovered.length === 0) {
+            throw new Error("Inga kompatibla Gemini-modeller hittades för denna API-nyckel.");
         }
 
-        let lastErr = null;
+        // Uppdatera dropdownen med de faktiskt tillgängliga modellerna för nyckeln
+        AI_MODELS.gemini = discovered.map((m) => ({ value: m, label: m }));
 
-        for (const candidateModel of candidateModels) {
+        const candidateModels = discovered.includes(model)
+            ? [model, ...discovered.filter((d) => d !== model)]
+            : discovered.slice(0, 4);
+
+        let firstErr = null;
+
+        for (const candidateModel of candidateModels.slice(0, 3)) {
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(candidateModel)}:generateContent?key=${encodeURIComponent(apiKey)}`;
                 const contents = history.map((msg) => ({
@@ -757,7 +750,7 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
                     const errMsg = data?.error?.message || `Gemini HTTP ${res.status}`;
-                    throw new Error(errMsg);
+                    throw new Error(`[${candidateModel}] ${errMsg}`);
                 }
 
                 updateProviderUI();
@@ -766,13 +759,13 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
 
                 return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Kunde inte tolka svaret från Gemini.";
             } catch (e) {
-                lastErr = e;
+                if (!firstErr) firstErr = e;
                 if (String(e.message).includes("API_KEY_INVALID") || String(e.message).includes("API key not valid")) {
                     break;
                 }
             }
         }
-        throw lastErr || new Error("Kunde inte ansluta till Gemini API.");
+        throw firstErr || new Error("Kunde inte ansluta till Gemini API.");
     }
 
     if (provider === "openai") {
