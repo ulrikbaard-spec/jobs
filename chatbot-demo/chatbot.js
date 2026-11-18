@@ -238,7 +238,7 @@ function initSettingsPanel() {
             const detected = detectProviderFromKey(savedKey);
             if (detected) els.aiProvider.value = detected;
         }
-    } catch (_) {}
+    } catch (_) { }
 
     updateProviderUI();
 }
@@ -276,7 +276,7 @@ function bindEvents() {
         updateProviderUI();
         try {
             localStorage.setItem("abhem_demo_provider", els.aiProvider.value);
-        } catch (_) {}
+        } catch (_) { }
     });
 
     els.aiModel.addEventListener("change", () => {
@@ -294,7 +294,7 @@ function bindEvents() {
         try {
             localStorage.setItem("abhem_demo_api_key", key);
             localStorage.setItem("abhem_demo_provider", els.aiProvider.value);
-        } catch (_) {}
+        } catch (_) { }
     });
 
     if (els.btnTestKey) {
@@ -387,65 +387,26 @@ function startWelcomeMessage() {
 }
 
 /* =========================================================
-   RÖSTFUNKTION (TAL-TILL-TEXT & TEXT-TILL-TAL PÅ SVENSKA)
+   RÖSTFUNKTION (TAL-TILL-TEXT + GEMINI AUDIO FALLBACK & TTS)
    ========================================================= */
 
+let mediaRecorder = null;
+let recordedChunks = [];
+
 function initSpeechEngine() {
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRec) {
-        recognition = new SpeechRec();
-        recognition.lang = "sv-SE";
-        recognition.continuous = false;
-        recognition.interimResults = true;
-
-        recognition.onstart = () => {
-            chatState.isListening = true;
-            if (els.chatMic) els.chatMic.classList.add("is-listening");
-            els.chatInput.classList.add("is-listening-input");
-            els.chatInput.placeholder = "Lyssnar… prata nu";
-        };
-
-        recognition.onresult = (event) => {
-            let transcript = "";
-            for (let i = 0; i < event.results.length; i++) {
-                transcript += event.results[i][0].transcript;
-            }
-            els.chatInput.value = transcript;
-        };
-
-        recognition.onerror = (event) => {
-            console.warn("SpeechRecognition error:", event.error);
-            stopListeningUI();
-            if (event.error === "not-allowed") {
-                appendBotMessage(
-                    "🎤 **Mikrofonåtkomst nekades.** Tillåt mikrofonen i din webbläsare (vid adressfältet) om du vill prata med chatten.",
-                    [],
-                    false
-                );
-            }
-        };
-
-        recognition.onend = () => {
-            const wasListening = chatState.isListening;
-            stopListeningUI();
-            const spokenText = els.chatInput.value.trim();
-            if (wasListening && spokenText) {
-                els.chatInput.value = "";
-                // Slå på röstuppläsning automatiskt när användaren pratar med boten
-                setTtsEnabled(true);
-                chatState.askedViaVoice = true;
-                handleUserQuestion(spokenText);
-            }
-        };
-    }
-
     if ("speechSynthesis" in window) {
-        // Förladda röstlistan i Chrome/Edge/Safari
         window.speechSynthesis.getVoices();
         window.speechSynthesis.onvoiceschanged = () => {
             window.speechSynthesis.getVoices();
         };
     }
+}
+
+function startListeningUI(statusText = "🎤 Lyssnar… prata nu (tryck igen för att skicka)") {
+    chatState.isListening = true;
+    if (els.chatMic) els.chatMic.classList.add("is-listening");
+    els.chatInput.classList.add("is-listening-input");
+    els.chatInput.placeholder = statusText;
 }
 
 function stopListeningUI() {
@@ -455,28 +416,222 @@ function stopListeningUI() {
     els.chatInput.placeholder = "Skriv eller tryck 🎤 för att prata…";
 }
 
-function toggleSpeechRecognition() {
+async function toggleSpeechRecognition() {
     stopSpeaking();
 
-    if (!recognition) {
+    // 1. Om vi redan lyssnar -> stoppa och skicka!
+    if (chatState.isListening) {
+        if (recognition) {
+            try { recognition.stop(); } catch (_) {}
+        }
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+            try { mediaRecorder.stop(); } catch (_) {}
+        }
+        return;
+    }
+
+    // 2. Kontrollera om sidan körs från file:// (där Chrome/Edge blockerar mikrofonen)
+    if (window.location.protocol === "file:") {
         appendBotMessage(
-            "🎤 Din nuvarande webbläsare saknar inbyggt stöd för röstinmatning (`SpeechRecognition`). Prova gärna i **Chrome**, **Edge** eller **Safari**!",
+            "🎤 **Mikrofon kräver `https://` eller `localhost`**\n\nWebbläsare blockerar mikrofonen när en fil öppnas direkt från hårddisken (`file://`). Öppna istället live-länken nedan så fungerar mikrofonen direkt:",
+            [
+                { label: "Öppna med mikrofon (GitHub Pages) →", url: "https://ulrikbaard-spec.github.io/jobs/chatbot-demo/" }
+            ],
+            false
+        );
+        return;
+    }
+
+    els.chatInput.value = "";
+    startListeningUI("🎤 Startar mikrofon…");
+
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRec) {
+        try {
+            recognition = new SpeechRec();
+            recognition.lang = "sv-SE";
+            recognition.continuous = false;
+            recognition.interimResults = true;
+
+            let finalTranscript = "";
+            let handledByFallback = false;
+
+            recognition.onstart = () => {
+                startListeningUI("🎤 Lyssnar på svenska… prata nu!");
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = "";
+                for (let i = 0; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                finalTranscript = transcript;
+                els.chatInput.value = transcript;
+            };
+
+            recognition.onerror = async (event) => {
+                console.warn("SpeechRecognition error:", event.error);
+
+                // Om webbläsarens taligenkänning ger nätverks-/tjänstefel (vanligt i Edge/Brave), falla tillbaka till MediaRecorder + Gemini Audio
+                if (
+                    (event.error === "network" || event.error === "service-not-allowed") &&
+                    els.aiApiKey.value.trim()
+                ) {
+                    handledByFallback = true;
+                    await startMediaRecorderFallback();
+                    return;
+                }
+
+                stopListeningUI();
+
+                if (event.error === "not-allowed" || event.error === "permission-denied") {
+                    appendBotMessage(
+                        "🎤 **Mikrofonen är blockerad i webbläsaren.** Klicka på hänglåset/ikonen till vänster i adressfältet och tillåt **Mikrofon**, och prova sedan igen!",
+                        [],
+                        false
+                    );
+                } else if (event.error === "no-speech") {
+                    els.chatInput.placeholder = "Hörde inget tal – tryck 🎤 för att prova igen";
+                } else {
+                    appendBotMessage(
+                        `🎤 Kunde inte starta röstinmatning (${event.error}). Kontrollera att en mikrofon är ansluten och tillåten i webbläsaren.`,
+                        [],
+                        false
+                    );
+                }
+            };
+
+            recognition.onend = () => {
+                if (handledByFallback) return;
+                const spokenText = (els.chatInput.value || finalTranscript).trim();
+                stopListeningUI();
+                if (spokenText) {
+                    els.chatInput.value = "";
+                    setTtsEnabled(true);
+                    chatState.askedViaVoice = true;
+                    handleUserQuestion(spokenText);
+                }
+            };
+
+            recognition.start();
+            return;
+        } catch (err) {
+            console.warn("SpeechRecognition start exception:", err);
+        }
+    }
+
+    // Reservmetod om webbläsaren saknar SpeechRecognition (t.ex. Firefox eller iOS WebView)
+    await startMediaRecorderFallback();
+}
+
+async function startMediaRecorderFallback() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        stopListeningUI();
+        appendBotMessage(
+            "🎤 Din webbläsare stöder inte mikrofoninspelning på denna sida. Prova i Chrome, Edge eller Safari via `https://ulrikbaard-spec.github.io/jobs/chatbot-demo/`.",
             [],
             false
         );
         return;
     }
 
-    if (chatState.isListening) {
-        recognition.stop();
-    } else {
-        els.chatInput.value = "";
-        try {
-            recognition.start();
-        } catch (err) {
-            console.warn("Could not start recognition:", err);
-        }
+    const apiKey = els.aiApiKey.value.trim();
+    if (!apiKey) {
+        stopListeningUI();
+        appendBotMessage(
+            "🎤 Din webbläsare saknar inbyggd svensk tal-till-text. Lägg in din **Gemini API-nyckel** i panelen till vänster (eller öppna sidan i Google Chrome) för att prata med boten!",
+            [],
+            false
+        );
+        return;
     }
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recordedChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) {
+                recordedChunks.push(e.data);
+            }
+        };
+
+        mediaRecorder.onstop = async () => {
+            stream.getTracks().forEach((t) => t.stop());
+            stopListeningUI();
+
+            const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+            if (blob.size < 500) return;
+
+            els.chatInput.placeholder = "⏳ Tolkar det du sa…";
+            try {
+                const transcript = await transcribeAudioWithGemini(blob, apiKey);
+                els.chatInput.placeholder = "Skriv eller tryck 🎤 för att prata…";
+                if (transcript) {
+                    setTtsEnabled(true);
+                    chatState.askedViaVoice = true;
+                    handleUserQuestion(transcript);
+                }
+            } catch (err) {
+                els.chatInput.placeholder = "Skriv eller tryck 🎤 för att prata…";
+                appendBotMessage(`🎤 Kunde inte tolka ljudet: ${err.message}`, [], false);
+            }
+        };
+
+        startListeningUI("🎤 Spelar in… Prata nu och tryck på 🎤 igen när du är klar!");
+        mediaRecorder.start();
+
+        // Stoppa automatiskt efter 8 sekunder om användaren inte tryckt igen
+        setTimeout(() => {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
+        }, 8000);
+    } catch (err) {
+        stopListeningUI();
+        appendBotMessage(
+            `🎤 Kunde inte komma åt mikrofonen (${err.message}). Kontrollera att du tillåtit mikrofonen i webbläsaren.`,
+            [],
+            false
+        );
+    }
+}
+
+async function transcribeAudioWithGemini(audioBlob, apiKey) {
+    const base64Audio = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const res = String(reader.result || "");
+            resolve(res.split(",")[1] || "");
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(audioBlob);
+    });
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            contents: [
+                {
+                    role: "user",
+                    parts: [
+                        { text: "Transkribera exakt vad som sägs i detta ljudklipp på svenska. Svara ENDAST med de transkriberade orden, inget annat." },
+                        { inlineData: { mimeType: audioBlob.type || "audio/webm", data: base64Audio } }
+                    ]
+                }
+            ]
+        })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+        throw new Error(data?.error?.message || `HTTP ${res.status}`);
+    }
+    return (data?.candidates?.[0]?.content?.parts?.[0]?.text || "").trim();
 }
 
 function setTtsEnabled(enabled) {
@@ -629,7 +784,7 @@ async function verifyAndSaveApiKey() {
         try {
             localStorage.setItem("abhem_demo_api_key", apiKey);
             localStorage.setItem("abhem_demo_provider", provider);
-        } catch (_) {}
+        } catch (_) { }
 
         els.apiKeyStatus.style.color = "#15803d";
         els.apiKeyStatus.textContent = `✅ API-nyckel verifierad och aktiv (${provider.toUpperCase()} · ${els.aiModel.value})! Nu svarar AI-modellen i chatten.`;
@@ -966,10 +1121,10 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
         // Om vald modell var en image- eller 2.0-modell, ignorera den och använd standardmodellerna med gratis kvot
         const safeSelected =
             model &&
-            !model.includes("image") &&
-            !model.includes("2.0") &&
-            !model.includes("1.5") &&
-            !model.includes("3.8")
+                !model.includes("image") &&
+                !model.includes("2.0") &&
+                !model.includes("1.5") &&
+                !model.includes("3.8")
                 ? [model]
                 : [];
 
