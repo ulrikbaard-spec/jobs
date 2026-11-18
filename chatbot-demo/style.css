@@ -464,6 +464,12 @@ body {
     background: rgba(255, 255, 255, 0.22);
 }
 
+.ab-chatbot .ab-header-btn.is-active {
+    background: #ffffff;
+    color: var(--dark);
+    border-color: #ffffff;
+}
+
 /* Message List */
 .ab-chatbot .ab-chat-messages {
     flex: 1 1 auto;
@@ -562,6 +568,35 @@ body {
     color: #ffffff !important;
 }
 
+.ab-chatbot .ab-msg-footer {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 8px;
+}
+
+.ab-chatbot .ab-speak-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--light);
+    color: var(--dark);
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.16s ease;
+}
+
+.ab-chatbot .ab-speak-btn:hover,
+.ab-chatbot .ab-speak-btn.is-speaking {
+    background: var(--green);
+    border-color: var(--green);
+    color: #ffffff;
+}
+
 /* Typing indicator */
 .ab-chatbot .ab-typing {
     display: inline-flex;
@@ -656,6 +691,45 @@ body {
 .ab-chatbot #ab-chat-input:focus {
     background: #ffffff;
     border-color: var(--green);
+}
+
+.ab-chatbot #ab-chat-input.is-listening-input {
+    border-color: #dc2626;
+    background: #fff5f5;
+}
+
+.ab-chatbot .ab-mic-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--light);
+    color: var(--dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+}
+
+.ab-chatbot .ab-mic-btn:hover {
+    background: var(--cream);
+    border-color: var(--green);
+    color: var(--green);
+}
+
+.ab-chatbot .ab-mic-btn.is-listening {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
+    animation: abMicPulse 1.2s infinite;
+}
+
+@keyframes abMicPulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45); }
+    70% { box-shadow: 0 0 0 11px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
 }
 
 .ab-chatbot .ab-send-btn {

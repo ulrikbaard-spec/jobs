@@ -169,14 +169,20 @@ const MUNICIPALITIES_DATA = [
 
 const chatState = {
     isOpen: true,
-    history: []
+    history: [],
+    ttsEnabled: false,
+    isListening: false,
+    askedViaVoice: false
 };
 
 const els = {};
+let recognition = null;
+let activeSpeakBtn = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     cacheElements();
     initSettingsPanel();
+    initSpeechEngine();
     bindEvents();
     startWelcomeMessage();
 });
@@ -197,12 +203,14 @@ function cacheElements() {
 
     els.chatWindow = document.getElementById("ab-chat-window");
     els.chatLauncher = document.getElementById("ab-chat-launcher");
+    els.chatToggleTts = document.getElementById("ab-chat-toggle-tts");
     els.chatClose = document.getElementById("ab-chat-close");
     els.chatClear = document.getElementById("ab-chat-clear");
     els.chatMessages = document.getElementById("ab-chat-messages");
     els.chatQuickBar = document.getElementById("ab-chat-quick-bar");
     els.chatForm = document.getElementById("ab-chat-form");
     els.chatInput = document.getElementById("ab-chat-input");
+    els.chatMic = document.getElementById("ab-chat-mic");
     els.chatModeBadge = document.getElementById("ab-chat-mode-badge");
 }
 
@@ -309,6 +317,19 @@ function bindEvents() {
     els.chatClear.addEventListener("click", resetConversation);
     els.demoResetChat.addEventListener("click", resetConversation);
 
+    if (els.chatToggleTts) {
+        els.chatToggleTts.addEventListener("click", () => {
+            setTtsEnabled(!chatState.ttsEnabled);
+            if (!chatState.ttsEnabled) {
+                stopSpeaking();
+            }
+        });
+    }
+
+    if (els.chatMic) {
+        els.chatMic.addEventListener("click", toggleSpeechRecognition);
+    }
+
     // Quick reply chips i chatten
     els.chatQuickBar.addEventListener("click", (e) => {
         const chip = e.target.closest(".ab-quick-chip");
@@ -342,9 +363,13 @@ function toggleChatWindow(open) {
     chatState.isOpen = open;
     els.chatWindow.classList.toggle("is-closed", !open);
     els.chatLauncher.setAttribute("aria-expanded", String(open));
+    if (!open) {
+        stopSpeaking();
+    }
 }
 
 function resetConversation() {
+    stopSpeaking();
     chatState.history = [];
     els.chatMessages.innerHTML = "";
     startWelcomeMessage();
@@ -352,12 +377,197 @@ function resetConversation() {
 
 function startWelcomeMessage() {
     appendBotMessage(
-        "Hej och välkommen till **AB-hem**! 👋\n\nJag hjälper dig med frågor om lediga lägenheter, **Hyres-potten**, våra 17 kommuner, uthyrningskrav eller felanmälan.\n\nVälj ett ämne nedan eller skriv din fråga!",
+        "Hej och välkommen till **AB-hem**! 👋\n\nJag hjälper dig med frågor om lediga lägenheter, **Hyres-potten**, våra 17 kommuner, uthyrningskrav eller felanmälan.\n\nVälj ett ämne nedan, skriv en fråga eller tryck på **🎤 mikrofonen** för att prata med mig!",
         [
             { label: "Se alla lediga bostäder →", url: "https://ab-hem.se/lediga-bostader/" },
             { label: "Läs om Hyres-potten →", url: "https://ab-hem.se/hyres-pott/" }
-        ]
+        ],
+        false
     );
+}
+
+/* =========================================================
+   RÖSTFUNKTION (TAL-TILL-TEXT & TEXT-TILL-TAL PÅ SVENSKA)
+   ========================================================= */
+
+function initSpeechEngine() {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRec) {
+        recognition = new SpeechRec();
+        recognition.lang = "sv-SE";
+        recognition.continuous = false;
+        recognition.interimResults = true;
+
+        recognition.onstart = () => {
+            chatState.isListening = true;
+            if (els.chatMic) els.chatMic.classList.add("is-listening");
+            els.chatInput.classList.add("is-listening-input");
+            els.chatInput.placeholder = "Lyssnar… prata nu";
+        };
+
+        recognition.onresult = (event) => {
+            let transcript = "";
+            for (let i = 0; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            els.chatInput.value = transcript;
+        };
+
+        recognition.onerror = (event) => {
+            console.warn("SpeechRecognition error:", event.error);
+            stopListeningUI();
+            if (event.error === "not-allowed") {
+                appendBotMessage(
+                    "🎤 **Mikrofonåtkomst nekades.** Tillåt mikrofonen i din webbläsare (vid adressfältet) om du vill prata med chatten.",
+                    [],
+                    false
+                );
+            }
+        };
+
+        recognition.onend = () => {
+            const wasListening = chatState.isListening;
+            stopListeningUI();
+            const spokenText = els.chatInput.value.trim();
+            if (wasListening && spokenText) {
+                els.chatInput.value = "";
+                // Slå på röstuppläsning automatiskt när användaren pratar med boten
+                setTtsEnabled(true);
+                chatState.askedViaVoice = true;
+                handleUserQuestion(spokenText);
+            }
+        };
+    }
+
+    if ("speechSynthesis" in window) {
+        // Förladda röstlistan i Chrome/Edge/Safari
+        window.speechSynthesis.getVoices();
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+        };
+    }
+}
+
+function stopListeningUI() {
+    chatState.isListening = false;
+    if (els.chatMic) els.chatMic.classList.remove("is-listening");
+    els.chatInput.classList.remove("is-listening-input");
+    els.chatInput.placeholder = "Skriv eller tryck 🎤 för att prata…";
+}
+
+function toggleSpeechRecognition() {
+    stopSpeaking();
+
+    if (!recognition) {
+        appendBotMessage(
+            "🎤 Din nuvarande webbläsare saknar inbyggt stöd för röstinmatning (`SpeechRecognition`). Prova gärna i **Chrome**, **Edge** eller **Safari**!",
+            [],
+            false
+        );
+        return;
+    }
+
+    if (chatState.isListening) {
+        recognition.stop();
+    } else {
+        els.chatInput.value = "";
+        try {
+            recognition.start();
+        } catch (err) {
+            console.warn("Could not start recognition:", err);
+        }
+    }
+}
+
+function setTtsEnabled(enabled) {
+    chatState.ttsEnabled = enabled;
+    if (!els.chatToggleTts) return;
+    els.chatToggleTts.textContent = enabled ? "🔊" : "🔇";
+    els.chatToggleTts.classList.toggle("is-active", enabled);
+    els.chatToggleTts.setAttribute("aria-pressed", String(enabled));
+    els.chatToggleTts.title = enabled
+        ? "Röstuppläsning är PÅ (klicka för att stänga av)"
+        : "Röstuppläsning är AV (klicka för att slå på)";
+}
+
+function cleanTextForSpeech(markdownText) {
+    return String(markdownText || "")
+        // Ta bort tekniska obs-rader på slutet
+        .replace(/\*\(Obs:[\s\S]*?\)\*/gi, "")
+        // Gör om markdown-länkar [text](url) till bara text
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, "$1")
+        // Ta bort råa URL:er
+        .replace(/https?:\/\/[^\s)]+/g, "")
+        // Ta bort markdown-fetstil/kursiv och punktlisttecken
+        .replace(/[*#_~`•]/g, "")
+        // Ta bort emojis och symboler
+        .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function stopSpeaking() {
+    if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+    }
+    if (activeSpeakBtn) {
+        activeSpeakBtn.classList.remove("is-speaking");
+        activeSpeakBtn.innerHTML = "🔊 Lyssna";
+        activeSpeakBtn = null;
+    }
+}
+
+function speakText(rawText, btnEl = null) {
+    if (!("speechSynthesis" in window)) return;
+
+    // Om man klickar på samma knapp som redan läser upp -> stoppa
+    if (btnEl && activeSpeakBtn === btnEl && window.speechSynthesis.speaking) {
+        stopSpeaking();
+        return;
+    }
+
+    stopSpeaking();
+
+    const clean = cleanTextForSpeech(rawText);
+    if (!clean) return;
+
+    const utterance = new SpeechSynthesisUtterance(clean);
+    utterance.lang = "sv-SE";
+    utterance.rate = 1.02;
+
+    const voices = window.speechSynthesis.getVoices();
+    const svVoices = voices.filter((v) => v.lang && v.lang.toLowerCase().startsWith("sv"));
+    if (svVoices.length > 0) {
+        // Prioritera naturliga röster (Natural / Online / Google / Alva / Klara / Sofie)
+        const preferred =
+            svVoices.find((v) => /natural|online|google|alva|klara|sofie|mattias/i.test(v.name)) ||
+            svVoices[0];
+        utterance.voice = preferred;
+    }
+
+    if (btnEl) {
+        activeSpeakBtn = btnEl;
+        btnEl.classList.add("is-speaking");
+        btnEl.innerHTML = "⏹️ Stoppa";
+    }
+
+    utterance.onend = () => {
+        if (activeSpeakBtn === btnEl && btnEl) {
+            btnEl.classList.remove("is-speaking");
+            btnEl.innerHTML = "🔊 Lyssna";
+            activeSpeakBtn = null;
+        }
+    };
+
+    utterance.onerror = () => {
+        if (activeSpeakBtn === btnEl && btnEl) {
+            btnEl.classList.remove("is-speaking");
+            btnEl.innerHTML = "🔊 Lyssna";
+            activeSpeakBtn = null;
+        }
+    };
+
+    window.speechSynthesis.speak(utterance);
 }
 
 /* =========================================================
@@ -903,7 +1113,7 @@ function appendUserMessage(text) {
     scrollToBottom();
 }
 
-function appendBotMessage(markdownText, actionLinks = []) {
+function appendBotMessage(markdownText, actionLinks = [], autoSpeak = true) {
     const wrap = document.createElement("div");
     wrap.className = "ab-msg ab-msg-bot";
 
@@ -928,9 +1138,30 @@ function appendBotMessage(markdownText, actionLinks = []) {
         bubble.appendChild(linksWrap);
     }
 
+    // Lägg till "🔊 Lyssna"-knapp under varje botsvar
+    let speakBtn = null;
+    if ("speechSynthesis" in window) {
+        const footer = document.createElement("div");
+        footer.className = "ab-msg-footer";
+        speakBtn = document.createElement("button");
+        speakBtn.type = "button";
+        speakBtn.className = "ab-speak-btn";
+        speakBtn.innerHTML = "🔊 Lyssna";
+        speakBtn.addEventListener("click", () => {
+            speakText(markdownText, speakBtn);
+        });
+        footer.appendChild(speakBtn);
+        bubble.appendChild(footer);
+    }
+
     wrap.appendChild(bubble);
     els.chatMessages.appendChild(wrap);
     scrollToBottom();
+
+    if (autoSpeak && (chatState.ttsEnabled || chatState.askedViaVoice)) {
+        chatState.askedViaVoice = false;
+        speakText(markdownText, speakBtn);
+    }
 }
 
 function showTypingIndicator() {
