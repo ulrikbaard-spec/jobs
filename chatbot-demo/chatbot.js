@@ -21,9 +21,11 @@ FAKTA & LÄNKAR FÖR AB-HEM:
 
 const AI_MODELS = {
     gemini: [
-        { value: "gemini-3.8-flash", label: "gemini-3.8-flash (Rekommenderad – Snabb)" },
-        { value: "gemini-3.8-pro", label: "gemini-3.8-pro (Avancerad)" },
-        { value: "gemini-2.5-flash", label: "gemini-2.5-flash (Äldre nycklar)" }
+        { value: "gemini-2.5-flash", label: "gemini-2.5-flash (Standard – Gratis kvot)" },
+        { value: "gemini-2.5-flash-lite", label: "gemini-2.5-flash-lite (Snabb – Gratis kvot)" },
+        { value: "gemini-flash-latest", label: "gemini-flash-latest (Alltid senaste Flash)" },
+        { value: "gemini-3-flash-preview", label: "gemini-3-flash-preview (Gemini 3 Flash)" },
+        { value: "gemini-2.5-pro", label: "gemini-2.5-pro (Avancerad)" }
     ],
     openai: [
         { value: "gpt-4o-mini", label: "gpt-4o-mini (Rekommenderad – Snabb)" },
@@ -678,6 +680,8 @@ async function discoverGeminiModels(apiKey) {
     if (!res.ok) {
         throw new Error(data?.error?.message || `Gemini Models HTTP ${res.status}`);
     }
+
+    // Filtrera BORT alla image-, vision-, tts-, audio-, exp- och 1.x/2.0-modeller som saknar gratis textkvot
     const list = (data.models || [])
         .filter((m) => {
             const name = String(m.name || "").toLowerCase();
@@ -685,27 +689,47 @@ async function discoverGeminiModels(apiKey) {
             return (
                 methods.includes("generateContent") &&
                 name.includes("gemini") &&
-                !name.includes("1.5") &&
-                !name.includes("1.0") &&
-                !name.includes("embedding") &&
+                !name.includes("image") &&
                 !name.includes("imagen") &&
+                !name.includes("vision") &&
                 !name.includes("tts") &&
                 !name.includes("audio") &&
+                !name.includes("live") &&
+                !name.includes("thinking") &&
+                !name.includes("exp") &&
+                !name.includes("1.5") &&
+                !name.includes("1.0") &&
+                !name.includes("2.0") &&
+                !name.includes("embedding") &&
                 !name.includes("robotics") &&
-                !name.includes("computer-use")
+                !name.includes("computer-use") &&
+                !name.includes("learnlm") &&
+                !name.includes("gemma")
             );
         })
         .map((m) => String(m.name).replace(/^models\//, ""));
 
-    // Prioritera nyaste Gemini 3.x flash-modeller först (fallande versionsnummer)
+    // Prioritera standardmodeller med gratis kvot (Free Tier) först
+    const freeTierPriority = [
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-flash-latest",
+        "gemini-flash-lite-latest",
+        "gemini-3-flash-preview",
+        "gemini-3.1-flash-lite-preview",
+        "gemini-2.5-pro"
+    ];
+
     list.sort((a, b) => {
-        const aIs3 = a.startsWith("gemini-3") ? 0 : 1;
-        const bIs3 = b.startsWith("gemini-3") ? 0 : 1;
-        if (aIs3 !== bIs3) return aIs3 - bIs3;
-        const aFlash = a.includes("flash") && !a.includes("lite") ? 0 : 1;
-        const bFlash = b.includes("flash") && !b.includes("lite") ? 0 : 1;
+        const idxA = freeTierPriority.indexOf(a);
+        const idxB = freeTierPriority.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        const aFlash = a.includes("flash") ? 0 : 1;
+        const bFlash = b.includes("flash") ? 0 : 1;
         if (aFlash !== bFlash) return aFlash - bFlash;
-        return b.localeCompare(a, undefined, { numeric: true });
+        return a.localeCompare(b);
     });
 
     return list;
@@ -713,7 +737,6 @@ async function discoverGeminiModels(apiKey) {
 
 async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, history }) {
     if (provider === "gemini") {
-        // 1. Hämta exakt vilka modeller som finns på nyckeln via ListModels
         let discovered = [];
         try {
             discovered = await discoverGeminiModels(apiKey);
@@ -730,17 +753,28 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
             AI_MODELS.gemini = discovered.map((m) => ({ value: m, label: m }));
         }
 
-        // Sätt gemini-3.8-flash och nyaste upptäckta modeller först
+        // Om vald modell var en image- eller 2.0-modell, ignorera den och använd standardmodellerna med gratis kvot
+        const safeSelected =
+            model &&
+            !model.includes("image") &&
+            !model.includes("2.0") &&
+            !model.includes("1.5") &&
+            !model.includes("3.8")
+                ? [model]
+                : [];
+
         const candidateModels = Array.from(
             new Set([
-                ...(model && !model.startsWith("gemini-2.") ? [model] : []),
-                "gemini-3.8-flash",
-                ...discovered,
-                ...(model ? [model] : [])
+                ...safeSelected,
+                "gemini-2.5-flash",
+                "gemini-2.5-flash-lite",
+                "gemini-flash-latest",
+                "gemini-3-flash-preview",
+                ...discovered
             ])
         );
 
-        let lastErr = null;
+        const errors = [];
 
         for (const candidateModel of candidateModels.slice(0, 6)) {
             try {
@@ -772,13 +806,13 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
 
                 return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Kunde inte tolka svaret från Gemini.";
             } catch (e) {
-                lastErr = e;
+                errors.push(e.message);
                 if (String(e.message).includes("API_KEY_INVALID") || String(e.message).includes("API key not valid")) {
                     break;
                 }
             }
         }
-        throw lastErr || new Error("Kunde inte ansluta till Gemini API.");
+        throw new Error(errors[0] || "Kunde inte ansluta till Gemini API.");
     }
 
     if (provider === "openai") {
