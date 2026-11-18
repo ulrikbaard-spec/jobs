@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=1.6">
+    <link rel="stylesheet" href="style.css?v=1.8">
 </head>
 
 <body>
@@ -103,9 +103,43 @@
                         </div>
 
                         <div class="demo-field">
-                            <label for="ai-system-prompt">Systemprompt & Kunskapsbas (skickas till vald
-                                AI-modell)</label>
-                            <textarea id="ai-system-prompt" rows="8"></textarea>
+                            <label for="ai-system-prompt">Grund-systemprompt (kombineras automatiskt med uppladdade kunskapsfiler)</label>
+                            <textarea id="ai-system-prompt" rows="6"></textarea>
+                        </div>
+
+                        <!-- UPPLADDNING AV KUNSKAPSFILER (.MD / RETELL / .TXT / .JSON / .CSV) -->
+                        <div class="demo-field kb-upload-section">
+                            <div class="kb-header-row">
+                                <label>📚 Kunskapsfiler (t.ex. Retell `.md`, `.txt`, `.json`, `.csv`)</label>
+                                <button type="button" id="btn-clear-kb" class="kb-clear-btn" hidden>Rensa alla</button>
+                            </div>
+
+                            <label for="kb-file-input" id="kb-dropzone" class="kb-dropzone">
+                                <input
+                                    type="file"
+                                    id="kb-file-input"
+                                    multiple
+                                    accept=".md,.markdown,.txt,.json,.csv,.html"
+                                    hidden
+                                >
+                                <span class="kb-drop-icon">📂</span>
+                                <strong>Släpp din Retell `.md`-fil eller andra kunskapsfiler här, eller klicka för att välja</strong>
+                                <span class="kb-drop-sub">Stöder flera filer samtidigt (sparas automatiskt i webbläsaren)</span>
+                            </label>
+
+                            <div id="kb-files-list" class="kb-files-list"></div>
+
+                            <!-- Förhandsgranskning / redigering av vald kunskapsfil -->
+                            <div id="kb-preview-box" class="kb-preview-box" hidden>
+                                <div class="kb-preview-header">
+                                    <strong id="kb-preview-title">Filnamn.md</strong>
+                                    <div style="display:flex; gap:6px;">
+                                        <button type="button" id="btn-save-kb-edit" class="kb-mini-btn primary">Spara ändring</button>
+                                        <button type="button" id="btn-close-kb-preview" class="kb-mini-btn">Stäng ✕</button>
+                                    </div>
+                                </div>
+                                <textarea id="kb-preview-textarea" rows="8"></textarea>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -247,7 +281,7 @@
 
     </div>
 
-    <script src="chatbot.js?v=1.7"></script>
+    <script src="chatbot.js?v=1.8"></script>
 </body>
 
 </html>

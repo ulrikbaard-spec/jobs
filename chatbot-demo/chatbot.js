@@ -172,7 +172,9 @@ const chatState = {
     history: [],
     ttsEnabled: false,
     isListening: false,
-    askedViaVoice: false
+    askedViaVoice: false,
+    kbFiles: [],
+    editingKbId: null
 };
 
 const els = {};
@@ -182,6 +184,7 @@ let activeSpeakBtn = null;
 document.addEventListener("DOMContentLoaded", () => {
     cacheElements();
     initSettingsPanel();
+    initKnowledgeBase();
     initSpeechEngine();
     bindEvents();
     startWelcomeMessage();
@@ -196,6 +199,16 @@ function cacheElements() {
     els.btnTestKey = document.getElementById("btn-test-key");
     els.apiKeyStatus = document.getElementById("api-key-status");
     els.aiSystemPrompt = document.getElementById("ai-system-prompt");
+
+    els.kbDropzone = document.getElementById("kb-dropzone");
+    els.kbFileInput = document.getElementById("kb-file-input");
+    els.kbFilesList = document.getElementById("kb-files-list");
+    els.btnClearKb = document.getElementById("btn-clear-kb");
+    els.kbPreviewBox = document.getElementById("kb-preview-box");
+    els.kbPreviewTitle = document.getElementById("kb-preview-title");
+    els.kbPreviewTextarea = document.getElementById("kb-preview-textarea");
+    els.btnSaveKbEdit = document.getElementById("btn-save-kb-edit");
+    els.btnCloseKbPreview = document.getElementById("btn-close-kb-preview");
 
     els.demoOpenChat = document.getElementById("demo-open-chat");
     els.demoResetChat = document.getElementById("demo-reset-chat");
@@ -245,10 +258,11 @@ function initSettingsPanel() {
 
 function updateProviderUI() {
     const provider = els.aiProvider.value;
+    const kbSuffix = chatState.kbFiles.length > 0 ? ` · 📚 ${chatState.kbFiles.length} fil${chatState.kbFiles.length > 1 ? "er" : ""}` : "";
 
     if (provider === "local") {
         els.aiModelWrap.hidden = true;
-        els.chatModeBadge.innerHTML = `<span class="ab-online-dot"></span> Lokal svarsmotor aktiv`;
+        els.chatModeBadge.innerHTML = `<span class="ab-online-dot"></span> Lokal svarsmotor${kbSuffix}`;
         return;
     }
 
@@ -268,7 +282,197 @@ function updateProviderUI() {
     }
 
     const providerLabel = provider === "gemini" ? "Gemini AI" : provider === "openai" ? "OpenAI" : "Claude AI";
-    els.chatModeBadge.innerHTML = `<span class="ab-online-dot"></span> ${providerLabel} (${els.aiModel.value})`;
+    els.chatModeBadge.innerHTML = `<span class="ab-online-dot"></span> ${providerLabel} (${els.aiModel.value})${kbSuffix}`;
+}
+
+/* =========================================================
+   KUNSKAPSFILER (.MD / RETELL / .TXT / .JSON / .CSV)
+   ========================================================= */
+
+function initKnowledgeBase() {
+    try {
+        const raw = localStorage.getItem("abhem_demo_kb_files");
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                chatState.kbFiles = parsed;
+            }
+        }
+    } catch (_) {}
+    renderKbFilesList();
+    updateProviderUI();
+}
+
+function saveKbFilesToStorage() {
+    try {
+        localStorage.setItem("abhem_demo_kb_files", JSON.stringify(chatState.kbFiles));
+    } catch (e) {
+        console.warn("Kunde inte spara kunskapsfiler i localStorage:", e);
+    }
+    renderKbFilesList();
+    updateProviderUI();
+}
+
+async function handleUploadedFiles(fileList) {
+    if (!fileList || fileList.length === 0) return;
+
+    for (const file of Array.from(fileList)) {
+        try {
+            const content = await file.text();
+            const existingIdx = chatState.kbFiles.findIndex((f) => f.name.toLowerCase() === file.name.toLowerCase());
+            const entry = {
+                id: "kb_" + Date.now() + "_" + Math.floor(Math.random() * 10000),
+                name: file.name,
+                content: content.trim(),
+                size: file.size || content.length
+            };
+            if (existingIdx !== -1) {
+                chatState.kbFiles[existingIdx] = entry;
+            } else {
+                chatState.kbFiles.push(entry);
+            }
+        } catch (err) {
+            console.error("Kunde inte läsa fil:", file.name, err);
+        }
+    }
+
+    saveKbFilesToStorage();
+
+    appendBotMessage(
+        `📚 **Kunskapsfil${fileList.length > 1 ? "er" : ""} inläst${fileList.length > 1 ? "a" : ""}!**\n\nJag har nu tillgång till innehållet i **${Array.from(fileList).map((f) => f.name).join(", ")}** (totalt ${chatState.kbFiles.length} aktiv${chatState.kbFiles.length > 1 ? "a" : ""} kunskapsfil${chatState.kbFiles.length > 1 ? "er" : ""}). Prova att ställa en fråga utifrån filen!`,
+        [],
+        false
+    );
+}
+
+function renderKbFilesList() {
+    if (!els.kbFilesList) return;
+    els.kbFilesList.innerHTML = "";
+    els.btnClearKb.hidden = chatState.kbFiles.length === 0;
+
+    chatState.kbFiles.forEach((file) => {
+        const row = document.createElement("div");
+        row.className = "kb-file-item";
+
+        const charCount = (file.content || "").length.toLocaleString("sv-SE");
+        row.innerHTML = `
+            <div class="kb-file-info">
+                <span class="kb-file-icon">📄</span>
+                <div class="kb-file-meta">
+                    <span class="kb-file-name">${escapeHtml(file.name)}</span>
+                    <span class="kb-file-size">${charCount} tecken · Aktiv i kunskapsbasen</span>
+                </div>
+            </div>
+            <div class="kb-file-actions">
+                <button type="button" class="kb-mini-btn btn-edit-kb">Visa / Redigera</button>
+                <button type="button" class="kb-mini-btn danger btn-delete-kb">Ta bort</button>
+            </div>
+        `;
+
+        row.querySelector(".btn-edit-kb").addEventListener("click", () => openKbPreview(file.id));
+        row.querySelector(".btn-delete-kb").addEventListener("click", () => deleteKbFile(file.id));
+        els.kbFilesList.appendChild(row);
+    });
+}
+
+function openKbPreview(id) {
+    const file = chatState.kbFiles.find((f) => f.id === id);
+    if (!file) return;
+    chatState.editingKbId = id;
+    els.kbPreviewTitle.textContent = `📄 ${file.name}`;
+    els.kbPreviewTextarea.value = file.content;
+    els.kbPreviewBox.hidden = false;
+    els.kbPreviewTextarea.focus();
+}
+
+function closeKbPreview() {
+    chatState.editingKbId = null;
+    els.kbPreviewBox.hidden = true;
+}
+
+function saveKbPreviewEdit() {
+    if (!chatState.editingKbId) return;
+    const file = chatState.kbFiles.find((f) => f.id === chatState.editingKbId);
+    if (file) {
+        file.content = els.kbPreviewTextarea.value.trim();
+        file.size = file.content.length;
+        saveKbFilesToStorage();
+    }
+    closeKbPreview();
+}
+
+function deleteKbFile(id) {
+    chatState.kbFiles = chatState.kbFiles.filter((f) => f.id !== id);
+    if (chatState.editingKbId === id) {
+        closeKbPreview();
+    }
+    saveKbFilesToStorage();
+}
+
+function buildFullSystemPrompt() {
+    const base = els.aiSystemPrompt.value.trim() || DEFAULT_SYSTEM_PROMPT;
+    if (chatState.kbFiles.length === 0) {
+        return base;
+    }
+
+    const kbBlock = chatState.kbFiles
+        .map((f) => `\n\n========================================\nKUNSKAPSFIL: ${f.name}\n========================================\n${f.content}`)
+        .join("");
+
+    return `${base}\n\nNEDAN FÖLJER UPPLADDADE KUNSKAPSFILER (t.ex. från Retell / interna dokument). Använd alltid denna kunskap i första hand när du svarar på besökarens frågor:${kbBlock}`;
+}
+
+function searchUploadedKnowledgeFiles(rawQuestion) {
+    if (chatState.kbFiles.length === 0) return null;
+
+    const stopWords = new Set([
+        "och", "att", "det", "som", "en", "ett", "på", "är", "av", "för", "med", "till", "den", "har", "de",
+        "inte", "om", "ett", "han", "men", "var", "jag", "sig", "från", "vi", "så", "kan", "man", "när",
+        "år", "säger", "under", "också", "efter", "eller", "nu", "sin", "där", "vid", "mot", "ska", "skulle",
+        "kommer", "får", "finns", "hur", "vad", "vilka", "vilken", "vilket", "er", "era", "ni", "hos", "ab-hem", "abhem"
+    ]);
+
+    const words = rawQuestion
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+        .split(/\s+/)
+        .filter((w) => w.length >= 3 && !stopWords.has(w));
+
+    if (words.length === 0) return null;
+
+    let bestChunk = null;
+    let bestScore = 0;
+    let bestFile = "";
+
+    for (const file of chatState.kbFiles) {
+        // Dela upp markdown-filen i logiska avsnitt vid rubriker (#, ##, ###) eller dubbelradbrytningar
+        const sections = String(file.content || "").split(/\n(?=##?\s)|(?:\r?\n){2,}/);
+        for (const sec of sections) {
+            const trimmed = sec.trim();
+            if (trimmed.length < 20) continue;
+            const lowerSec = trimmed.toLowerCase();
+            let score = 0;
+            for (const w of words) {
+                if (lowerSec.includes(w)) {
+                    score += w.length >= 5 ? 2 : 1;
+                }
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                bestChunk = trimmed;
+                bestFile = file.name;
+            }
+        }
+    }
+
+    if (bestScore >= 2 && bestChunk) {
+        return {
+            text: `📄 **Svar från kunskapsfil (${bestFile}):**\n\n${bestChunk.slice(0, 900)}`,
+            links: extractSuggestedLinksForText(rawQuestion + " " + bestChunk)
+        };
+    }
+
+    return null;
 }
 
 function bindEvents() {
@@ -299,6 +503,54 @@ function bindEvents() {
 
     if (els.btnTestKey) {
         els.btnTestKey.addEventListener("click", verifyAndSaveApiKey);
+    }
+
+    // Kunskapsfiler (.md / .txt / .json / .csv) uppladdning & drag-and-drop
+    if (els.kbFileInput) {
+        els.kbFileInput.addEventListener("change", (e) => {
+            handleUploadedFiles(e.target.files);
+            els.kbFileInput.value = "";
+        });
+    }
+
+    if (els.kbDropzone) {
+        ["dragenter", "dragover"].forEach((evt) => {
+            els.kbDropzone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                els.kbDropzone.classList.add("is-dragover");
+            });
+        });
+
+        ["dragleave", "drop"].forEach((evt) => {
+            els.kbDropzone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                els.kbDropzone.classList.remove("is-dragover");
+            });
+        });
+
+        els.kbDropzone.addEventListener("drop", (e) => {
+            if (e.dataTransfer && e.dataTransfer.files) {
+                handleUploadedFiles(e.dataTransfer.files);
+            }
+        });
+    }
+
+    if (els.btnClearKb) {
+        els.btnClearKb.addEventListener("click", () => {
+            chatState.kbFiles = [];
+            closeKbPreview();
+            saveKbFilesToStorage();
+        });
+    }
+
+    if (els.btnSaveKbEdit) {
+        els.btnSaveKbEdit.addEventListener("click", saveKbPreviewEdit);
+    }
+
+    if (els.btnCloseKbPreview) {
+        els.btnCloseKbPreview.addEventListener("click", closeKbPreview);
     }
 
     els.chatLauncher.addEventListener("click", () => {
@@ -422,10 +674,10 @@ async function toggleSpeechRecognition() {
     // 1. Om vi redan lyssnar -> stoppa och skicka!
     if (chatState.isListening) {
         if (recognition) {
-            try { recognition.stop(); } catch (_) {}
+            try { recognition.stop(); } catch (_) { }
         }
         if (mediaRecorder && mediaRecorder.state === "recording") {
-            try { mediaRecorder.stop(); } catch (_) {}
+            try { mediaRecorder.stop(); } catch (_) { }
         }
         return;
     }
@@ -808,7 +1060,7 @@ async function handleUserQuestion(questionText) {
 
     const provider = els.aiProvider.value;
     const model = els.aiModel.value;
-    const systemPrompt = els.aiSystemPrompt.value.trim() || DEFAULT_SYSTEM_PROMPT;
+    const systemPrompt = buildFullSystemPrompt();
 
     try {
         if (provider !== "local" && apiKey) {
@@ -825,7 +1077,8 @@ async function handleUserQuestion(questionText) {
             appendBotMessage(aiReply, extractSuggestedLinksForText(questionText + " " + aiReply));
         } else {
             await new Promise((r) => setTimeout(r, 320));
-            const localReply = getLocalBotResponse(questionText);
+            const kbMatch = searchUploadedKnowledgeFiles(questionText);
+            const localReply = kbMatch || getLocalBotResponse(questionText);
             removeTypingIndicator(typingEl);
             chatState.history.push({ role: "assistant", content: localReply.text });
             appendBotMessage(localReply.text, localReply.links);
@@ -833,7 +1086,8 @@ async function handleUserQuestion(questionText) {
     } catch (err) {
         console.warn("AI-anrop misslyckades, använder lokalt reservläge:", err);
         removeTypingIndicator(typingEl);
-        const fallback = getLocalBotResponse(questionText);
+        const kbMatch = searchUploadedKnowledgeFiles(questionText);
+        const fallback = kbMatch || getLocalBotResponse(questionText);
         chatState.history.push({ role: "assistant", content: fallback.text });
         if (els.apiKeyStatus) {
             els.apiKeyStatus.style.color = "#b91c1c";
