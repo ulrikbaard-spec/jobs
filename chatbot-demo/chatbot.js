@@ -22,6 +22,8 @@ FAKTA & LÄNKAR FÖR AB-HEM:
 const AI_MODELS = {
     gemini: [
         { value: "gemini-2.5-flash", label: "gemini-2.5-flash (Rekommenderad – Snabb)" },
+        { value: "gemini-2.0-flash", label: "gemini-2.0-flash (Stabil & Snabb)" },
+        { value: "gemini-1.5-flash", label: "gemini-1.5-flash (Bred kompatibilitet)" },
         { value: "gemini-2.5-pro", label: "gemini-2.5-pro (Avancerad)" }
     ],
     openai: [
@@ -184,6 +186,8 @@ function cacheElements() {
     els.aiModel = document.getElementById("ai-model");
     els.aiKeyWrap = document.getElementById("ai-key-wrap");
     els.aiApiKey = document.getElementById("ai-api-key");
+    els.btnTestKey = document.getElementById("btn-test-key");
+    els.apiKeyStatus = document.getElementById("api-key-status");
     els.aiSystemPrompt = document.getElementById("ai-system-prompt");
 
     els.demoOpenChat = document.getElementById("demo-open-chat");
@@ -201,8 +205,32 @@ function cacheElements() {
     els.chatModeBadge = document.getElementById("ab-chat-mode-badge");
 }
 
+function detectProviderFromKey(key) {
+    const k = (key || "").trim();
+    if (!k) return null;
+    if (k.startsWith("AIza")) return "gemini";
+    if (k.startsWith("sk-ant-")) return "anthropic";
+    if (k.startsWith("sk-")) return "openai";
+    return null;
+}
+
 function initSettingsPanel() {
     els.aiSystemPrompt.value = DEFAULT_SYSTEM_PROMPT;
+
+    try {
+        const savedKey = localStorage.getItem("abhem_demo_api_key") || "";
+        const savedProvider = localStorage.getItem("abhem_demo_provider") || "";
+        if (savedKey) {
+            els.aiApiKey.value = savedKey;
+        }
+        if (savedProvider && ["local", "gemini", "openai", "anthropic"].includes(savedProvider)) {
+            els.aiProvider.value = savedProvider;
+        } else if (savedKey) {
+            const detected = detectProviderFromKey(savedKey);
+            if (detected) els.aiProvider.value = detected;
+        }
+    } catch (_) {}
+
     updateProviderUI();
 }
 
@@ -211,15 +239,14 @@ function updateProviderUI() {
 
     if (provider === "local") {
         els.aiModelWrap.hidden = true;
-        els.aiKeyWrap.hidden = true;
-        els.chatModeBadge.innerHTML = `<span class="ab-online-dot"></span> Svarar direkt dygnet runt`;
+        els.chatModeBadge.innerHTML = `<span class="ab-online-dot"></span> Lokal svarsmotor aktiv`;
         return;
     }
 
     els.aiModelWrap.hidden = false;
-    els.aiKeyWrap.hidden = false;
 
     const models = AI_MODELS[provider] || [];
+    const prevModel = els.aiModel.value;
     els.aiModel.innerHTML = "";
     models.forEach((m) => {
         const opt = document.createElement("option");
@@ -227,13 +254,43 @@ function updateProviderUI() {
         opt.textContent = m.label;
         els.aiModel.appendChild(opt);
     });
+    if (models.some((m) => m.value === prevModel)) {
+        els.aiModel.value = prevModel;
+    }
 
     const providerLabel = provider === "gemini" ? "Gemini AI" : provider === "openai" ? "OpenAI" : "Claude AI";
-    els.chatModeBadge.innerHTML = `<span class="ab-online-dot"></span> ${providerLabel} aktiv`;
+    els.chatModeBadge.innerHTML = `<span class="ab-online-dot"></span> ${providerLabel} (${els.aiModel.value})`;
 }
 
 function bindEvents() {
-    els.aiProvider.addEventListener("change", updateProviderUI);
+    els.aiProvider.addEventListener("change", () => {
+        updateProviderUI();
+        try {
+            localStorage.setItem("abhem_demo_provider", els.aiProvider.value);
+        } catch (_) {}
+    });
+
+    els.aiModel.addEventListener("change", () => {
+        updateProviderUI();
+    });
+
+    // Auto-detektera leverantör så fort man klistrar in eller skriver en nyckel
+    els.aiApiKey.addEventListener("input", () => {
+        const key = els.aiApiKey.value.trim();
+        const detected = detectProviderFromKey(key);
+        if (detected && els.aiProvider.value !== detected) {
+            els.aiProvider.value = detected;
+            updateProviderUI();
+        }
+        try {
+            localStorage.setItem("abhem_demo_api_key", key);
+            localStorage.setItem("abhem_demo_provider", els.aiProvider.value);
+        } catch (_) {}
+    });
+
+    if (els.btnTestKey) {
+        els.btnTestKey.addEventListener("click", verifyAndSaveApiKey);
+    }
 
     els.chatLauncher.addEventListener("click", () => {
         toggleChatWindow(!chatState.isOpen);
@@ -303,8 +360,73 @@ function startWelcomeMessage() {
 }
 
 /* =========================================================
-   HANTERA FRÅGA (AI ELLER LOKAL MOTOR)
+   HANTERA FRÅGA & TESTA API-NYCKEL
    ========================================================= */
+
+function sanitizeAlternatingHistory(history) {
+    const cleaned = [];
+    for (const msg of history) {
+        if (!msg || !msg.content) continue;
+        if (cleaned.length === 0) {
+            if (msg.role === "user") {
+                cleaned.push({ role: "user", content: msg.content });
+            }
+        } else {
+            const last = cleaned[cleaned.length - 1];
+            if (last.role === msg.role) {
+                last.content += "\n" + msg.content;
+            } else {
+                cleaned.push({ role: msg.role, content: msg.content });
+            }
+        }
+    }
+    return cleaned;
+}
+
+async function verifyAndSaveApiKey() {
+    const apiKey = els.aiApiKey.value.trim();
+    if (!apiKey) {
+        els.apiKeyStatus.style.color = "#b91c1c";
+        els.apiKeyStatus.textContent = "⚠️ Klistra in en API-nyckel i rutan först.";
+        return;
+    }
+
+    const detected = detectProviderFromKey(apiKey);
+    if (detected && els.aiProvider.value !== detected) {
+        els.aiProvider.value = detected;
+        updateProviderUI();
+    } else if (els.aiProvider.value === "local") {
+        // Om nyckeln inte har standardprefix men användaren klickar Testa & Spara, välj Gemini som standard
+        els.aiProvider.value = "gemini";
+        updateProviderUI();
+    }
+
+    const provider = els.aiProvider.value;
+    const model = els.aiModel.value;
+    els.apiKeyStatus.style.color = "#173c36";
+    els.apiKeyStatus.textContent = `⏳ Testar anslutning mot ${provider.toUpperCase()} (${model})…`;
+
+    try {
+        await callSelectedAiModel({
+            provider,
+            model,
+            apiKey,
+            systemPrompt: "Svara endast med ordet OK.",
+            history: [{ role: "user", content: "Test" }]
+        });
+
+        try {
+            localStorage.setItem("abhem_demo_api_key", apiKey);
+            localStorage.setItem("abhem_demo_provider", provider);
+        } catch (_) {}
+
+        els.apiKeyStatus.style.color = "#15803d";
+        els.apiKeyStatus.textContent = `✅ API-nyckel verifierad och aktiv (${provider.toUpperCase()} · ${els.aiModel.value})! Nu svarar AI-modellen i chatten.`;
+    } catch (err) {
+        els.apiKeyStatus.style.color = "#b91c1c";
+        els.apiKeyStatus.textContent = `❌ Kunde inte verifiera nyckeln: ${err.message}`;
+    }
+}
 
 async function handleUserQuestion(questionText) {
     appendUserMessage(questionText);
@@ -312,25 +434,30 @@ async function handleUserQuestion(questionText) {
 
     const typingEl = showTypingIndicator();
 
-    const provider = els.aiProvider.value;
     const apiKey = els.aiApiKey.value.trim();
+    if (apiKey && els.aiProvider.value === "local") {
+        els.aiProvider.value = detectProviderFromKey(apiKey) || "gemini";
+        updateProviderUI();
+    }
+
+    const provider = els.aiProvider.value;
     const model = els.aiModel.value;
     const systemPrompt = els.aiSystemPrompt.value.trim() || DEFAULT_SYSTEM_PROMPT;
 
     try {
         if (provider !== "local" && apiKey) {
+            const cleanHist = sanitizeAlternatingHistory(chatState.history.slice(-8));
             const aiReply = await callSelectedAiModel({
                 provider,
                 model,
                 apiKey,
                 systemPrompt,
-                history: chatState.history.slice(-6)
+                history: cleanHist
             });
             removeTypingIndicator(typingEl);
             chatState.history.push({ role: "assistant", content: aiReply });
             appendBotMessage(aiReply, extractSuggestedLinksForText(questionText + " " + aiReply));
         } else {
-            // Kort naturlig fördröjning för lokal svarsmotor
             await new Promise((r) => setTimeout(r, 320));
             const localReply = getLocalBotResponse(questionText);
             removeTypingIndicator(typingEl);
@@ -341,8 +468,13 @@ async function handleUserQuestion(questionText) {
         console.warn("AI-anrop misslyckades, använder lokalt reservläge:", err);
         removeTypingIndicator(typingEl);
         const fallback = getLocalBotResponse(questionText);
+        chatState.history.push({ role: "assistant", content: fallback.text });
+        if (els.apiKeyStatus) {
+            els.apiKeyStatus.style.color = "#b91c1c";
+            els.apiKeyStatus.textContent = `❌ AI-fel: ${err.message}`;
+        }
         appendBotMessage(
-            fallback.text + `\n\n*(Obs: Kunde inte nå vald AI-modell [${err.message}], så svaret kommer från AB-hems inbyggda reservläge).*`,
+            fallback.text + `\n\n*(Obs: AI-anropet gav felet "${err.message}", så svaret ovan kommer från AB-hems inbyggda reservläge).*`,
             fallback.links
         );
     }
@@ -541,27 +673,49 @@ function getLocalBotResponse(rawQuestion) {
 
 async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, history }) {
     if (provider === "gemini") {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
-        const contents = history.map((msg) => ({
-            role: msg.role === "assistant" ? "model" : "user",
-            parts: [{ text: msg.content }]
-        }));
+        // Prova vald modell först, annars fallback till 2.0-flash / 1.5-flash om modellen inte är aktiverad på nyckeln
+        const candidateModels = Array.from(new Set([model, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]));
+        let lastErr = null;
 
-        const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                system_instruction: { parts: [{ text: systemPrompt }] },
-                contents,
-                generationConfig: { temperature: 0.3, maxOutputTokens: 500 }
-            })
-        });
+        for (const candidateModel of candidateModels) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(candidateModel)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                const contents = history.map((msg) => ({
+                    role: msg.role === "assistant" ? "model" : "user",
+                    parts: [{ text: msg.content }]
+                }));
 
-        if (!res.ok) {
-            throw new Error(`Gemini HTTP ${res.status}`);
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        contents,
+                        generationConfig: { temperature: 0.3, maxOutputTokens: 600 }
+                    })
+                });
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    const errMsg = data?.error?.message || `Gemini HTTP ${res.status}`;
+                    throw new Error(errMsg);
+                }
+
+                if (els.aiModel.value !== candidateModel) {
+                    els.aiModel.value = candidateModel;
+                    updateProviderUI();
+                }
+
+                return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Kunde inte tolka svaret från Gemini.";
+            } catch (e) {
+                lastErr = e;
+                // Om nyckeln i sig är ogiltig (API_KEY_INVALID), avbryt direkt
+                if (String(e.message).includes("API_KEY_INVALID") || String(e.message).includes("API key not valid")) {
+                    break;
+                }
+            }
         }
-        const data = await res.json();
-        return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Kunde inte tolka svaret från Gemini.";
+        throw lastErr || new Error("Kunde inte ansluta till Gemini API.");
     }
 
     if (provider === "openai") {
@@ -574,7 +728,7 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
             body: JSON.stringify({
                 model,
                 temperature: 0.3,
-                max_tokens: 500,
+                max_tokens: 600,
                 messages: [
                     { role: "system", content: systemPrompt },
                     ...history
@@ -582,10 +736,10 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
             })
         });
 
+        const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-            throw new Error(`OpenAI HTTP ${res.status}`);
+            throw new Error(data?.error?.message || `OpenAI HTTP ${res.status}`);
         }
-        const data = await res.json();
         return data?.choices?.[0]?.message?.content || "Kunde inte tolka svaret från OpenAI.";
     }
 
@@ -600,16 +754,16 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
             },
             body: JSON.stringify({
                 model,
-                max_tokens: 500,
+                max_tokens: 600,
                 system: systemPrompt,
                 messages: history
             })
         });
 
+        const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-            throw new Error(`Anthropic HTTP ${res.status}`);
+            throw new Error(data?.error?.message || `Anthropic HTTP ${res.status}`);
         }
-        const data = await res.json();
         return data?.content?.[0]?.text || "Kunde inte tolka svaret från Claude.";
     }
 

@@ -77,12 +77,17 @@
                             <select id="ai-model"></select>
                         </div>
 
-                        <div id="ai-key-wrap" class="demo-field" hidden>
-                            <label for="ai-api-key">API-nyckel (sparas endast lokalt i din webbläsare under testet)</label>
-                            <input type="password" id="ai-api-key" placeholder="Klistra in din API-nyckel här…" autocomplete="off">
-                            <small class="demo-hint">
-                                Om fältet lämnas tomt (eller vid fel) faller boten automatiskt tillbaka på den lokala svarsmotorn.
-                            </small>
+                        <div id="ai-key-wrap" class="demo-field">
+                            <label for="ai-api-key">API-nyckel (valfritt – klistra in Gemini, OpenAI eller Claude-nyckel)</label>
+                            <div style="display:flex; gap:8px;">
+                                <input type="password" id="ai-api-key" placeholder="Klistra in din API-nyckel (t.ex. AIza… eller sk-…)" autocomplete="off">
+                                <button type="button" id="btn-test-key" class="demo-btn" style="background:#315847; color:#fff; min-height:42px; padding:0 16px; white-space:nowrap; font-size:13px;">
+                                    Testa & Spara
+                                </button>
+                            </div>
+                            <div id="api-key-status" class="demo-hint" style="font-weight:700;">
+                                Klistra in din nyckel och tryck på "Testa & Spara" – rätt AI-leverantör väljs automatiskt!
+                            </div>
                         </div>
 
                         <div class="demo-field">
