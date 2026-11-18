@@ -952,8 +952,8 @@ select {
 
 .modal-quick-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
-    overflow-x: auto;
     padding: 10px 18px;
     background: var(--light);
     border-bottom: 1px solid var(--line);
@@ -981,15 +981,17 @@ select {
 }
 
 .modal-body {
-    padding: 16px 18px;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 16px 18px 24px;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    -webkit-overflow-scrolling: touch;
+    display: block;
 }
 
 .detail-description-box {
     padding: 14px;
+    margin-bottom: 16px;
     border-radius: 14px;
     background: var(--cream);
     border: 1px solid var(--cream-border);
@@ -1013,10 +1015,14 @@ select {
 }
 
 .detail-section {
+    margin-bottom: 16px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    overflow: hidden;
     background: var(--white);
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
 }
 
 .detail-section-title {
@@ -1024,6 +1030,7 @@ select {
     padding: 10px 14px;
     background: var(--light);
     border-bottom: 1px solid var(--line);
+    border-radius: 13px 13px 0 0;
     font-size: 12px;
     font-weight: 800;
     text-transform: uppercase;
