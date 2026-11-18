@@ -671,10 +671,69 @@ function getLocalBotResponse(rawQuestion) {
    ANROP TILL VALBAR AI-MODELL (GEMINI / OPENAI / ANTHROPIC)
    ========================================================= */
 
+async function discoverGeminiModels(apiKey) {
+    const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`
+    );
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+        throw new Error(data?.error?.message || `Gemini Models HTTP ${res.status}`);
+    }
+    const list = (data.models || [])
+        .filter(
+            (m) =>
+                Array.isArray(m.supportedGenerationMethods) &&
+                m.supportedGenerationMethods.includes("generateContent") &&
+                String(m.name || "").includes("gemini")
+        )
+        .map((m) => String(m.name).replace(/^models\//, ""));
+
+    // Sortera så att flash-modeller hamnar överst
+    list.sort((a, b) => {
+        const aFlash = a.includes("flash") ? 0 : 1;
+        const bFlash = b.includes("flash") ? 0 : 1;
+        if (aFlash !== bFlash) return aFlash - bFlash;
+        return b.localeCompare(a);
+    });
+
+    return list;
+}
+
 async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, history }) {
     if (provider === "gemini") {
-        // Prova vald modell först, annars fallback till 2.0-flash / 1.5-flash om modellen inte är aktiverad på nyckeln
-        const candidateModels = Array.from(new Set([model, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]));
+        // Hämta tillgängliga modeller för nyckeln om vald modell ger 404
+        let candidateModels = Array.from(
+            new Set([
+                model,
+                "gemini-2.5-flash",
+                "gemini-2.0-flash",
+                "gemini-flash-latest",
+                "gemini-1.5-flash-latest",
+                "gemini-pro-latest"
+            ])
+        );
+
+        try {
+            const discovered = await discoverGeminiModels(apiKey);
+            if (discovered.length > 0) {
+                AI_MODELS.gemini = discovered.map((m) => ({ value: m, label: m }));
+                // Om nuvarande modell finns bland de upptäckta, behåll den först, annars ta första upptäckta
+                if (discovered.includes(model)) {
+                    candidateModels = [model, ...discovered.filter((d) => d !== model)];
+                } else {
+                    candidateModels = discovered;
+                }
+            }
+        } catch (discErr) {
+            // Om själva nyckeln är ogiltig kastar vi felet direkt
+            if (
+                String(discErr.message).includes("API_KEY_INVALID") ||
+                String(discErr.message).includes("API key not valid")
+            ) {
+                throw discErr;
+            }
+        }
+
         let lastErr = null;
 
         for (const candidateModel of candidateModels) {
@@ -701,15 +760,13 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
                     throw new Error(errMsg);
                 }
 
-                if (els.aiModel.value !== candidateModel) {
-                    els.aiModel.value = candidateModel;
-                    updateProviderUI();
-                }
+                updateProviderUI();
+                els.aiModel.value = candidateModel;
+                els.chatModeBadge.innerHTML = `<span class="ab-online-dot"></span> Gemini AI (${candidateModel})`;
 
                 return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Kunde inte tolka svaret från Gemini.";
             } catch (e) {
                 lastErr = e;
-                // Om nyckeln i sig är ogiltig (API_KEY_INVALID), avbryt direkt
                 if (String(e.message).includes("API_KEY_INVALID") || String(e.message).includes("API key not valid")) {
                     break;
                 }
