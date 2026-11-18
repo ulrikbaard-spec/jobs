@@ -174,12 +174,15 @@ const chatState = {
     isListening: false,
     askedViaVoice: false,
     kbFiles: [],
-    editingKbId: null
+    editingKbId: null,
+    verifiedGeminiModel: ""
 };
 
 const els = {};
 let recognition = null;
 let activeSpeakBtn = null;
+let speechSilenceTimer = null;
+let speechWatchdogTimer = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     cacheElements();
@@ -663,22 +666,43 @@ function startListeningUI(statusText = "🎤 Lyssnar… prata nu (tryck igen fö
 
 function stopListeningUI() {
     chatState.isListening = false;
+    clearTimeout(speechSilenceTimer);
+    clearTimeout(speechWatchdogTimer);
     if (els.chatMic) els.chatMic.classList.remove("is-listening");
     els.chatInput.classList.remove("is-listening-input");
     els.chatInput.placeholder = "Skriv eller tryck 🎤 för att prata…";
 }
 
+function finalizeSpokenInput(text) {
+    const clean = (text || els.chatInput.value || "").trim();
+    stopListeningUI();
+    if (recognition) {
+        try {
+            recognition.onresult = null;
+            recognition.onend = null;
+            recognition.onerror = null;
+            recognition.abort();
+        } catch (_) { }
+        recognition = null;
+    }
+    if (clean) {
+        els.chatInput.value = "";
+        setTtsEnabled(true);
+        chatState.askedViaVoice = true;
+        handleUserQuestion(clean);
+    }
+}
+
 async function toggleSpeechRecognition() {
     stopSpeaking();
 
-    // 1. Om vi redan lyssnar -> stoppa och skicka!
+    // 1. Om vi redan lyssnar -> avbryt direkt och skicka det som sagts (hänger aldrig!)
     if (chatState.isListening) {
-        if (recognition) {
-            try { recognition.stop(); } catch (_) { }
-        }
         if (mediaRecorder && mediaRecorder.state === "recording") {
             try { mediaRecorder.stop(); } catch (_) { }
+            return;
         }
+        finalizeSpokenInput(els.chatInput.value);
         return;
     }
 
@@ -695,7 +719,7 @@ async function toggleSpeechRecognition() {
     }
 
     els.chatInput.value = "";
-    startListeningUI("🎤 Startar mikrofon…");
+    startListeningUI("🎤 Lyssnar på svenska… prata nu!");
 
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -703,29 +727,48 @@ async function toggleSpeechRecognition() {
         try {
             recognition = new SpeechRec();
             recognition.lang = "sv-SE";
-            recognition.continuous = false;
+            recognition.continuous = true;
             recognition.interimResults = true;
 
-            let finalTranscript = "";
+            let latestTranscript = "";
             let handledByFallback = false;
 
+            // Watchdog om webbläsarens taligenkänning fastnar utan att höra något inom 8 sek
+            speechWatchdogTimer = setTimeout(() => {
+                if (chatState.isListening && !latestTranscript) {
+                    finalizeSpokenInput("");
+                    els.chatInput.placeholder = "Hörde inget tal – tryck 🎤 för att prova igen";
+                }
+            }, 8000);
+
             recognition.onstart = () => {
-                startListeningUI("🎤 Lyssnar på svenska… prata nu!");
+                startListeningUI("🎤 Lyssnar… prata nu (skickas automatiskt när du tystnar)");
             };
 
             recognition.onresult = (event) => {
+                clearTimeout(speechWatchdogTimer);
                 let transcript = "";
                 for (let i = 0; i < event.results.length; i++) {
                     transcript += event.results[i][0].transcript;
                 }
-                finalTranscript = transcript;
-                els.chatInput.value = transcript;
+                latestTranscript = transcript.trim();
+                els.chatInput.value = latestTranscript;
+
+                // Skicka automatiskt efter 1,4 sekunders tystnad efter att du pratat klart!
+                clearTimeout(speechSilenceTimer);
+                if (latestTranscript) {
+                    speechSilenceTimer = setTimeout(() => {
+                        if (chatState.isListening) {
+                            finalizeSpokenInput(latestTranscript);
+                        }
+                    }, 1400);
+                }
             };
 
             recognition.onerror = async (event) => {
                 console.warn("SpeechRecognition error:", event.error);
+                if (event.error === "aborted") return;
 
-                // Om webbläsarens taligenkänning ger nätverks-/tjänstefel (vanligt i Edge/Brave), falla tillbaka till MediaRecorder + Gemini Audio
                 if (
                     (event.error === "network" || event.error === "service-not-allowed") &&
                     els.aiApiKey.value.trim()
@@ -755,15 +798,8 @@ async function toggleSpeechRecognition() {
             };
 
             recognition.onend = () => {
-                if (handledByFallback) return;
-                const spokenText = (els.chatInput.value || finalTranscript).trim();
-                stopListeningUI();
-                if (spokenText) {
-                    els.chatInput.value = "";
-                    setTtsEnabled(true);
-                    chatState.askedViaVoice = true;
-                    handleUserQuestion(spokenText);
-                }
+                if (handledByFallback || !chatState.isListening) return;
+                finalizeSpokenInput(latestTranscript || els.chatInput.value);
             };
 
             recognition.start();
@@ -862,7 +898,8 @@ async function transcribeAudioWithGemini(audioBlob, apiKey) {
         reader.readAsDataURL(audioBlob);
     });
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const activeModel = chatState.verifiedGeminiModel || els.aiModel.value || "gemini-3-flash-preview";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(activeModel)}:generateContent?key=${encodeURIComponent(apiKey)}`;
     const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1356,46 +1393,52 @@ async function discoverGeminiModels(apiKey) {
 
 async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, history }) {
     if (provider === "gemini") {
-        let discovered = [];
-        try {
-            discovered = await discoverGeminiModels(apiKey);
-        } catch (discErr) {
-            if (
-                String(discErr.message).includes("API_KEY_INVALID") ||
-                String(discErr.message).includes("API key not valid")
-            ) {
-                throw discErr;
+        // Om vi redan hittat en fungerande modell för denna session, anropa den direkt utan att loopa!
+        let candidateModels = [];
+        if (chatState.verifiedGeminiModel) {
+            candidateModels = [chatState.verifiedGeminiModel];
+        } else {
+            let discovered = [];
+            try {
+                discovered = await discoverGeminiModels(apiKey);
+            } catch (discErr) {
+                if (
+                    String(discErr.message).includes("API_KEY_INVALID") ||
+                    String(discErr.message).includes("API key not valid")
+                ) {
+                    throw discErr;
+                }
             }
+
+            if (discovered.length > 0) {
+                AI_MODELS.gemini = discovered.map((m) => ({ value: m, label: m }));
+            }
+
+            const safeSelected =
+                model &&
+                    !model.includes("image") &&
+                    !model.includes("2.0") &&
+                    !model.includes("1.5") &&
+                    !model.includes("3.8")
+                    ? [model]
+                    : [];
+
+            candidateModels = Array.from(
+                new Set([
+                    ...safeSelected,
+                    ...discovered,
+                    "gemini-3-flash-preview",
+                    "gemini-flash-latest",
+                    "gemini-2.5-flash-lite"
+                ])
+            );
         }
-
-        if (discovered.length > 0) {
-            AI_MODELS.gemini = discovered.map((m) => ({ value: m, label: m }));
-        }
-
-        // Om vald modell var en image- eller 2.0-modell, ignorera den och använd standardmodellerna med gratis kvot
-        const safeSelected =
-            model &&
-                !model.includes("image") &&
-                !model.includes("2.0") &&
-                !model.includes("1.5") &&
-                !model.includes("3.8")
-                ? [model]
-                : [];
-
-        const candidateModels = Array.from(
-            new Set([
-                ...safeSelected,
-                "gemini-2.5-flash",
-                "gemini-2.5-flash-lite",
-                "gemini-flash-latest",
-                "gemini-3-flash-preview",
-                ...discovered
-            ])
-        );
 
         const errors = [];
 
-        for (const candidateModel of candidateModels.slice(0, 6)) {
+        for (const candidateModel of candidateModels.slice(0, 4)) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 12000);
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(candidateModel)}:generateContent?key=${encodeURIComponent(apiKey)}`;
                 const contents = history.map((msg) => ({
@@ -1406,12 +1449,14 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
                 const res = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
+                    signal: controller.signal,
                     body: JSON.stringify({
                         systemInstruction: { parts: [{ text: systemPrompt }] },
                         contents,
                         generationConfig: { temperature: 0.3, maxOutputTokens: 600 }
                     })
                 });
+                clearTimeout(timer);
 
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
@@ -1419,13 +1464,18 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
                     throw new Error(`[${candidateModel}] ${errMsg}`);
                 }
 
+                // Spara den fungerande modellen så att alla kommande svar går direkt på <1 sekund!
+                chatState.verifiedGeminiModel = candidateModel;
                 updateProviderUI();
                 els.aiModel.value = candidateModel;
-                els.chatModeBadge.innerHTML = `<span class="ab-online-dot"></span> Gemini AI (${candidateModel})`;
 
                 return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Kunde inte tolka svaret från Gemini.";
             } catch (e) {
-                errors.push(e.message);
+                clearTimeout(timer);
+                if (chatState.verifiedGeminiModel === candidateModel) {
+                    chatState.verifiedGeminiModel = "";
+                }
+                errors.push(e.name === "AbortError" ? `[${candidateModel}] Timeout efter 12s` : e.message);
                 if (String(e.message).includes("API_KEY_INVALID") || String(e.message).includes("API key not valid")) {
                     break;
                 }
