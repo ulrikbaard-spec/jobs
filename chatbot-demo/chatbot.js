@@ -17,9 +17,13 @@ VIKTIGA RIKTLINJER FÖR DINA SVAR:
 KUNSKAPSBAS FÖR AB-HEM:
 
 • UPPSÄGNING AV KONTRAKT:
-- Uppsägningstiden för bostad är alltid 3 hela kalendermånader (räknas från månadsskiftet efter att skriftlig uppsägning kommit in).
-- Uppsägning ska ske skriftligt (via uppsägningsblankett, på baksidan av kontraktet eller undertecknad scanning/foto via e-post till bostad@ab-hem.se).
-- Vid dödsfall är uppsägningstiden 1 hel kalendermånad om den inkommer inom en månad från dödsfallet.
+- Uppsägningstiden för bostad är alltid 3 hela kalendermånader (räknas från månadsskiftet efter att skriftlig uppsägning inkommit). Exempel: Om uppsägningen inkommer den 15 mars upphör hyreskontraktet den 30 juni.
+- Uppsägningen MÅSTE alltid vara skriftlig och egenhändigt undertecknad med namnteckning.
+- Vart och hur skickar man uppsägningen:
+  1. E-post (snabbast): Skicka till bostad@ab-hem.se. Skanna in uppsägningsblanketten, baksidan av kontraktet eller ta ett tydligt och läsbart foto på den underskrivna blanketten och bifoga i mejlet.
+  2. Vanlig post: Skicka med brev till AB-Hems huvudkontor: AB-Hem, Myntgatan 5B, 738 31 Norberg.
+  3. Lämna personligen: Lägg i kontorets brevinkast på Myntgatan 5B i Norberg.
+- Vid dödsfall är uppsägningstiden 1 hel kalendermånad om den inkommer inom en månad från dödsfallet (dödsfallsintyg med släktutredning ska bifogas).
 - Länk: Uthyrningspolicy https://ab-hem.se/uthyrningspolicy/
 
 • HYRA OCH BETALNING:
@@ -1512,16 +1516,38 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
                     parts: [{ text: msg.content }]
                 }));
 
-                const res = await fetch(url, {
+                let requestBody = {
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    contents,
+                    generationConfig: {
+                        temperature: 0.3,
+                        maxOutputTokens: 2048,
+                        thinkingConfig: { thinkingBudget: 0 }
+                    }
+                };
+
+                let res = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     signal: controller.signal,
-                    body: JSON.stringify({
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
-                        contents,
-                        generationConfig: { temperature: 0.3, maxOutputTokens: 600 }
-                    })
+                    body: JSON.stringify(requestBody)
                 });
+
+                // Om modellen inte stöder thinkingConfig i denna API-version, försök direkt utan
+                if (!res.ok && res.status === 400) {
+                    const probeJson = await res.clone().json().catch(() => ({}));
+                    const probeMsg = String(probeJson?.error?.message || "");
+                    if (probeMsg.includes("thinkingConfig") || probeMsg.includes("thinkingBudget") || probeMsg.includes("Unknown field")) {
+                        delete requestBody.generationConfig.thinkingConfig;
+                        res = await fetch(url, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            signal: controller.signal,
+                            body: JSON.stringify(requestBody)
+                        });
+                    }
+                }
+
                 clearTimeout(timer);
 
                 const data = await res.json().catch(() => ({}));
@@ -1535,7 +1561,12 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
                 updateProviderUI();
                 els.aiModel.value = candidateModel;
 
-                return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Kunde inte tolka svaret från Gemini.";
+                // Extrahera fullständig text och filtrera bort eventuella interna tankeparter
+                const parts = data?.candidates?.[0]?.content?.parts || [];
+                const replyParts = parts.filter((p) => !p.thought && p.text).map((p) => p.text);
+                const fullText = (replyParts.length > 0 ? replyParts.join("\n") : parts.map((p) => p.text || "").join("\n")).trim();
+
+                return fullText || "Kunde inte tolka svaret från Gemini.";
             } catch (e) {
                 clearTimeout(timer);
                 if (chatState.verifiedGeminiModel === candidateModel) {
@@ -1562,7 +1593,7 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
             body: JSON.stringify({
                 model,
                 temperature: 0.3,
-                max_tokens: 600,
+                max_tokens: 1500,
                 messages: [
                     { role: "system", content: systemPrompt },
                     ...history
@@ -1588,7 +1619,7 @@ async function callSelectedAiModel({ provider, model, apiKey, systemPrompt, hist
             },
             body: JSON.stringify({
                 model,
-                max_tokens: 600,
+                max_tokens: 1500,
                 system: systemPrompt,
                 messages: history
             })
