@@ -1160,3 +1160,295 @@ select {
     }
 }
 
+/* =========================================================
+   PERSONAL CARETAKER BANNER ("MINA JOBB" & SNABBLÄNK)
+   ========================================================= */
+
+.personal-banner {
+    background: linear-gradient(135deg, #173c36 0%, #205048 100%);
+    color: #ffffff;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 18px rgba(23, 60, 54, 0.18);
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    animation: fadeInBanner 0.25s ease-out;
+}
+
+@keyframes fadeInBanner {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.personal-banner-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.personal-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.personal-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.personal-text {
+    min-width: 0;
+}
+
+.personal-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.personal-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #ffffff;
+}
+
+.personal-name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.25;
+    color: #ffffff;
+}
+
+.personal-stats {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #d1e4da;
+    font-weight: 500;
+}
+
+.personal-stats strong {
+    color: #ffffff;
+    font-weight: 800;
+}
+
+.personal-stats .acute-highlight {
+    display: inline-block;
+    margin-left: 6px;
+    background: rgba(220, 38, 38, 0.25);
+    color: #fca5a5;
+    padding: 1px 7px;
+    border-radius: 6px;
+    font-weight: 800;
+}
+
+.personal-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-personal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.btn-personal-share {
+    background: #ffffff;
+    color: #173c36;
+}
+
+.btn-personal-share:hover {
+    background: #f0f7f3;
+    transform: translateY(-1px);
+}
+
+.btn-personal-clear {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-personal-clear:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* =========================================================
+   FIELD LABEL WITH ACTION BUTTON (ADMIN COPY LINK)
+   ========================================================= */
+
+.field-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.field-label-row label {
+    margin-bottom: 0 !important;
+}
+
+.link-action-btn {
+    border: none;
+    background: transparent;
+    color: var(--green);
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: var(--transition);
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.link-action-btn:hover {
+    background: rgba(49, 88, 71, 0.08);
+}
+
+.link-action-btn.is-copied {
+    color: #15803d;
+    background: #eaf7ee;
+}
+
+/* =========================================================
+   MOBILOPTIMISERADE SNABBÅTGÄRDER PÅ JOBBKORTEN
+   ========================================================= */
+
+.job-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed #e2ebe5;
+    flex-wrap: wrap;
+}
+
+.card-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--transition);
+    font-family: inherit;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.card-action-call {
+    background: #eaf4ed;
+    color: #173c36;
+    border: 1px solid #c2ded0;
+}
+
+.card-action-call:hover {
+    background: #d9ecdf;
+    border-color: #a7cfb9;
+    color: #0f2723;
+}
+
+.card-action-map {
+    background: #f1f5f9;
+    color: #1e3a5f;
+    border: 1px solid #cbd5e1;
+}
+
+.card-action-map:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+.card-action-open {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 0 6px;
+}
+
+.card-action-open:hover {
+    color: var(--dark);
+    text-decoration: underline;
+}
+
+/* =========================================================
+   TOAST NOTIFICATION
+   ========================================================= */
+
+.toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #173c36;
+    color: #ffffff;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 700;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    max-width: 90vw;
+    text-align: center;
+    animation: toastSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastSlideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 16px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+

@@ -65,6 +65,38 @@
          ========================================================= -->
     <main class="app-main">
 
+        <!-- PERSONAL CARETAKER / MINA JOBB BANNER -->
+        <section id="personal-banner" class="personal-banner" hidden>
+            <div class="personal-banner-inner">
+                <div class="personal-info">
+                    <div class="personal-avatar" aria-hidden="true">👷</div>
+                    <div class="personal-text">
+                        <div class="personal-title-row">
+                            <span class="personal-tag">Mina jobb</span>
+                            <h2 id="personal-name" class="personal-name">Fastighetsskötare</h2>
+                        </div>
+                        <p id="personal-stats" class="personal-stats">Hämtar dina tilldelade jobb…</p>
+                    </div>
+                </div>
+                <div class="personal-actions">
+                    <button type="button" id="btn-share-personal" class="btn-personal-btn btn-personal-share" title="Kopiera snabblänk till dina jobb">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>Dela min länk</span>
+                    </button>
+                    <button type="button" id="btn-clear-personal" class="btn-personal-btn btn-personal-clear" title="Visa alla jobb på företaget">
+                        <span>Visa alla jobb</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
         <!-- ACCESS / SHARING NOTICE (visas om Google-arket är låst) -->
         <section id="access-banner" class="access-banner" hidden>
             <div class="access-banner-header">
@@ -116,7 +148,12 @@
             <!-- Viktiga filter: Fastighetsskötare, Status, Typ, Nr -->
             <div class="filter-grid">
                 <div class="filter-field">
-                    <label for="filter-caretaker">Fastighetsskötare</label>
+                    <div class="field-label-row">
+                        <label for="filter-caretaker">Fastighetsskötare</label>
+                        <button type="button" id="btn-copy-caretaker-link" class="link-action-btn" title="Kopiera personlig snabblänk för vald skötare" hidden>
+                            📋 Kopiera snabblänk
+                        </button>
+                    </div>
                     <select id="filter-caretaker">
                         <option value="">Alla fastighetsskötare</option>
                     </select>
@@ -260,7 +297,10 @@
         </div>
     </div>
 
-    <script src="app.js?v=1.6"></script>
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="app.js?v=1.7"></script>
 </body>
 
 </html>

@@ -163,6 +163,14 @@ function cacheElements() {
     els.btnCloseModal = document.getElementById("btn-close-modal");
     els.btnModalDone = document.getElementById("btn-modal-done");
     els.toggleAllColumns = document.getElementById("toggle-all-columns");
+
+    els.personalBanner = document.getElementById("personal-banner");
+    els.personalName = document.getElementById("personal-name");
+    els.personalStats = document.getElementById("personal-stats");
+    els.btnSharePersonal = document.getElementById("btn-share-personal");
+    els.btnClearPersonal = document.getElementById("btn-clear-personal");
+    els.btnCopyCaretakerLink = document.getElementById("btn-copy-caretaker-link");
+    els.toast = document.getElementById("toast");
 }
 
 function bindEvents() {
@@ -202,9 +210,33 @@ function bindEvents() {
 
     // Dropdowns & Nr
     els.filterCaretaker.addEventListener("change", (e) => {
-        state.filters.caretaker = e.target.value;
+        const val = e.target.value;
+        state.filters.caretaker = val;
+        syncCaretakerToUrlAndStorage(val);
         applyFiltersAndRender();
     });
+
+    if (els.btnClearPersonal) {
+        els.btnClearPersonal.addEventListener("click", () => {
+            state.filters.caretaker = "";
+            els.filterCaretaker.value = "";
+            syncCaretakerToUrlAndStorage("");
+            applyFiltersAndRender();
+            showToast("Visar nu alla jobb på hela företaget.");
+        });
+    }
+
+    if (els.btnSharePersonal) {
+        els.btnSharePersonal.addEventListener("click", () => {
+            copyCaretakerLink(state.filters.caretaker);
+        });
+    }
+
+    if (els.btnCopyCaretakerLink) {
+        els.btnCopyCaretakerLink.addEventListener("click", () => {
+            copyCaretakerLink(state.filters.caretaker || els.filterCaretaker.value);
+        });
+    }
 
     els.filterStatus.addEventListener("change", (e) => {
         state.filters.status = e.target.value;
@@ -533,6 +565,9 @@ function onSheetLoaded(jobs) {
 
     const now = new Date().toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
     els.syncStatus.textContent = `Live · ${jobs.length.toLocaleString("sv-SE")} öppna jobb · Uppdaterad ${now}`;
+
+    // Läs av eventuell personlig snabblänk i URL eller sparad fastighetsskötare
+    detectUrlParametersAndStorage();
 
     applyFiltersAndRender();
 }
@@ -872,6 +907,8 @@ function resetAllFilters() {
         sort: "date_desc"
     };
 
+    syncCaretakerToUrlAndStorage("");
+
     els.filterSearch.value = "";
     els.btnClearSearch.hidden = true;
     els.filterCaretaker.value = "";
@@ -899,6 +936,7 @@ function applyFiltersAndRender() {
     populateFilterOptions();
     renderKpiStrip();
     renderActiveFilterToolbar();
+    updatePersonalBannerUI();
     renderJobsList(false);
 }
 
@@ -993,6 +1031,145 @@ function getStatusClass(statusRaw) {
 }
 
 /* =========================================================
+   URL-PARAMETRAR, SNABBLÄNKAR & PERSONLIG MOBILHEADER
+   ========================================================= */
+
+function detectUrlParametersAndStorage() {
+    const params = new URLSearchParams(window.location.search);
+    const paramCaretaker = params.get("skotare") || params.get("fastighetsskotare") || params.get("caretaker");
+    const paramBovard = params.get("bovard") || params.get("vard");
+
+    if (paramCaretaker) {
+        const queryLower = paramCaretaker.trim().toLowerCase();
+        const allCaretakers = Array.from(new Set(state.allJobs.map((j) => cleanEmptyValue(j["Fastighetsskötare"])).filter(Boolean)));
+        
+        // Exakt eller delvis matchning mot fastighetsskötare i arket
+        const match = allCaretakers.find((c) => c.toLowerCase() === queryLower)
+                   || allCaretakers.find((c) => c.toLowerCase().includes(queryLower))
+                   || paramCaretaker.trim();
+
+        state.filters.caretaker = match;
+        els.filterCaretaker.value = match;
+        try {
+            localStorage.setItem("abhem_jobs_saved_caretaker", match);
+        } catch (_) {}
+        return;
+    }
+
+    if (paramBovard) {
+        state.filters.search = paramBovard.trim();
+        els.filterSearch.value = paramBovard.trim();
+        els.btnClearSearch.hidden = false;
+        return;
+    }
+
+    // Om inga URL-parametrar gavs, kolla om användaren har sparat sin fastighetsskötare i localStorage
+    try {
+        const saved = localStorage.getItem("abhem_jobs_saved_caretaker");
+        if (saved) {
+            const allCaretakers = Array.from(new Set(state.allJobs.map((j) => cleanEmptyValue(j["Fastighetsskötare"])).filter(Boolean)));
+            if (allCaretakers.includes(saved)) {
+                state.filters.caretaker = saved;
+                els.filterCaretaker.value = saved;
+            }
+        }
+    } catch (_) {}
+}
+
+function syncCaretakerToUrlAndStorage(caretaker) {
+    const params = new URLSearchParams(window.location.search);
+    if (caretaker) {
+        params.set("skotare", caretaker);
+        try {
+            localStorage.setItem("abhem_jobs_saved_caretaker", caretaker);
+        } catch (_) {}
+    } else {
+        params.delete("skotare");
+        params.delete("fastighetsskotare");
+        params.delete("caretaker");
+        try {
+            localStorage.removeItem("abhem_jobs_saved_caretaker");
+        } catch (_) {}
+    }
+
+    const newSearch = params.toString() ? `?${params.toString()}` : window.location.pathname;
+    window.history.replaceState(null, "", newSearch);
+}
+
+function updatePersonalBannerUI() {
+    const caretaker = state.filters.caretaker;
+    if (!caretaker) {
+        if (els.personalBanner) els.personalBanner.hidden = true;
+        if (els.btnCopyCaretakerLink) els.btnCopyCaretakerLink.hidden = true;
+        return;
+    }
+
+    if (els.personalBanner) {
+        els.personalBanner.hidden = false;
+        els.personalName.textContent = caretaker;
+
+        // Räkna antal aktiva och akuta jobb för vald skötare
+        const caretakerJobs = state.allJobs.filter((j) => cleanEmptyValue(j["Fastighetsskötare"]) === caretaker);
+        const acuteCount = caretakerJobs.filter(isJobAcute).length;
+        const total = caretakerJobs.length;
+
+        let statsHtml = `Du har <strong>${total}</strong> aktiv${total === 1 ? "t" : "a"} jobb tilldelat`;
+        if (acuteCount > 0) {
+            statsHtml += ` <span class="acute-highlight">🔥 ${acuteCount} akut${acuteCount === 1 ? "" : "a"}</span>`;
+        }
+        els.personalStats.innerHTML = statsHtml;
+    }
+
+    if (els.btnCopyCaretakerLink) {
+        els.btnCopyCaretakerLink.hidden = false;
+        els.btnCopyCaretakerLink.title = `Kopiera snabblänk för ${caretaker}`;
+    }
+}
+
+async function copyCaretakerLink(caretakerName) {
+    if (!caretakerName) return;
+    const url = `${window.location.origin}${window.location.pathname}?skotare=${encodeURIComponent(caretakerName)}`;
+
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(url);
+        } else {
+            const temp = document.createElement("input");
+            temp.value = url;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand("copy");
+            document.body.removeChild(temp);
+        }
+
+        showToast(`📋 Snabblänk för ${caretakerName} kopierad till urklipp!`);
+
+        if (els.btnCopyCaretakerLink) {
+            const original = els.btnCopyCaretakerLink.innerHTML;
+            els.btnCopyCaretakerLink.classList.add("is-copied");
+            els.btnCopyCaretakerLink.innerHTML = "✅ Kopierad!";
+            setTimeout(() => {
+                els.btnCopyCaretakerLink.classList.remove("is-copied");
+                els.btnCopyCaretakerLink.innerHTML = original;
+            }, 2500);
+        }
+    } catch (e) {
+        prompt("Kopiera snabblänken manuellt:", url);
+    }
+}
+
+let toastTimer = null;
+function showToast(message, duration = 3000) {
+    if (!els.toast) return;
+    els.toast.textContent = message;
+    els.toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        els.toast.hidden = true;
+    }, duration);
+}
+
+/* =========================================================
    RENDERING: AKTIVA FILTER & JOBBLISTA
    ========================================================= */
 
@@ -1001,7 +1178,14 @@ function renderActiveFilterToolbar() {
     const chips = [];
 
     if (f.caretaker) {
-        chips.push({ label: `Skötare: ${f.caretaker}`, clear: () => { f.caretaker = ""; els.filterCaretaker.value = ""; } });
+        chips.push({
+            label: `Skötare: ${f.caretaker}`,
+            clear: () => {
+                f.caretaker = "";
+                els.filterCaretaker.value = "";
+                syncCaretakerToUrlAndStorage("");
+            }
+        });
     }
     if (f.status) {
         chips.push({ label: `Status: ${f.status}`, clear: () => { f.status = ""; els.filterStatus.value = ""; } });
@@ -1144,6 +1328,47 @@ function createJobCardElement(job) {
     ].filter(Boolean);
     const exactLocation = locParts.join(" · ") || (cleanEmptyValue(job["Hyresavi nr"]) ? `Avi ${cleanEmptyValue(job["Hyresavi nr"])}` : "—");
 
+    // Mobiloptimerade snabbknappar (Ring hyresgäst / Karta / Detaljer)
+    const rawPhone = cleanEmptyValue(job["Hyresavier::Tel 1"]) || extractPhoneFromText(job["Jobb-beskrivning"] || "");
+    const cleanPhone = formatSwedishPhone(rawPhone);
+    const tenantFirstName = tenantName ? tenantName.split(" ")[0] : "";
+    const mapAddress = [streetAddress, cityAddress || cleanEmptyValue(job["Hyresavier::Postnr"])].filter(Boolean).join(", ");
+
+    const actionBtns = [];
+
+    if (cleanPhone) {
+        const dialNumber = cleanPhone.replace(/[^\d+]/g, "");
+        actionBtns.push(`
+            <a href="tel:${escapeHtml(dialNumber)}" class="card-action-btn card-action-call" title="Ring ${escapeHtml(tenantName || 'hyresgäst')}" onclick="event.stopPropagation()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                <span>Ring ${escapeHtml(tenantFirstName || 'hyresgäst')}</span>
+            </a>
+        `);
+    }
+
+    if (mapAddress) {
+        actionBtns.push(`
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapAddress)}" target="_blank" rel="noopener" class="card-action-btn card-action-map" title="Öppna adress i Google Maps" onclick="event.stopPropagation()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                    <line x1="8" y1="2" x2="8" y2="18"></line>
+                    <line x1="16" y1="6" x2="16" y2="22"></line>
+                </svg>
+                <span>Karta</span>
+            </a>
+        `);
+    }
+
+    actionBtns.push(`
+        <button type="button" class="card-action-btn card-action-open" aria-label="Visa fullständiga jobbdetaljer">
+            <span>Öppna →</span>
+        </button>
+    `);
+
+    const actionsHtml = `<div class="job-card-actions">${actionBtns.join("")}</div>`;
+
     card.innerHTML = `
         <div class="job-card-top">
             <div class="job-card-top-left">
@@ -1178,6 +1403,8 @@ function createJobCardElement(job) {
                 <span class="meta-value">👤 ${escapeHtml(bovardText)}</span>
             </div>
         </div>
+
+        ${actionsHtml}
     `;
 
     card.addEventListener("click", () => openJobModal(job));
