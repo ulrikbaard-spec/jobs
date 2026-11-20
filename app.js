@@ -1042,17 +1042,25 @@ function detectUrlParametersAndStorage() {
     if (paramCaretaker) {
         const queryLower = paramCaretaker.trim().toLowerCase();
         const allCaretakers = Array.from(new Set(state.allJobs.map((j) => cleanEmptyValue(j["Fastighetsskötare"])).filter(Boolean)));
-        
+
         // Exakt eller delvis matchning mot fastighetsskötare i arket
         const match = allCaretakers.find((c) => c.toLowerCase() === queryLower)
-                   || allCaretakers.find((c) => c.toLowerCase().includes(queryLower))
-                   || paramCaretaker.trim();
+            || allCaretakers.find((c) => c.toLowerCase().includes(queryLower))
+            || paramCaretaker.trim();
 
         state.filters.caretaker = match;
         els.filterCaretaker.value = match;
         try {
             localStorage.setItem("abhem_jobs_saved_caretaker", match);
-        } catch (_) {}
+        } catch (_) { }
+
+        // På mobil: fäll ihop filterpanelen så att skötaren ser sina jobb direkt under bannern
+        if (window.innerWidth <= 768 && els.filterPanel) {
+            els.filterPanel.classList.add("collapsed");
+            if (els.btnToggleFilters) {
+                els.btnToggleFilters.setAttribute("aria-expanded", "false");
+            }
+        }
         return;
     }
 
@@ -1071,9 +1079,15 @@ function detectUrlParametersAndStorage() {
             if (allCaretakers.includes(saved)) {
                 state.filters.caretaker = saved;
                 els.filterCaretaker.value = saved;
+                if (window.innerWidth <= 768 && els.filterPanel) {
+                    els.filterPanel.classList.add("collapsed");
+                    if (els.btnToggleFilters) {
+                        els.btnToggleFilters.setAttribute("aria-expanded", "false");
+                    }
+                }
             }
         }
-    } catch (_) {}
+    } catch (_) { }
 }
 
 function syncCaretakerToUrlAndStorage(caretaker) {
@@ -1082,14 +1096,14 @@ function syncCaretakerToUrlAndStorage(caretaker) {
         params.set("skotare", caretaker);
         try {
             localStorage.setItem("abhem_jobs_saved_caretaker", caretaker);
-        } catch (_) {}
+        } catch (_) { }
     } else {
         params.delete("skotare");
         params.delete("fastighetsskotare");
         params.delete("caretaker");
         try {
             localStorage.removeItem("abhem_jobs_saved_caretaker");
-        } catch (_) {}
+        } catch (_) { }
     }
 
     const newSearch = params.toString() ? `?${params.toString()}` : window.location.pathname;
