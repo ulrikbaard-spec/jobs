@@ -721,6 +721,20 @@ select {
     font-weight: 700;
 }
 
+.lgh-code-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    background: #eef5f1;
+    border: 1px solid #bddcc7;
+    color: #173c36;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
 .job-card-top-right {
     display: flex;
     align-items: center;

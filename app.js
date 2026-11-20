@@ -1388,6 +1388,7 @@ function createJobCardElement(job) {
             <div class="job-card-top-left">
                 <span class="nr-badge">${escapeHtml(nrText)}</span>
                 <span class="date-badge">📅 ${escapeHtml(createdText)}</span>
+                ${lghKod ? `<span class="lgh-code-badge" title="Lägenhetskod: ${escapeHtml(lghKod)}">🔑 ${escapeHtml(lghKod)}</span>` : ""}
                 ${typeText ? `<span class="type-badge">${escapeHtml(typeText)}</span>` : ""}
             </div>
             <div class="job-card-top-right">
@@ -1409,12 +1410,12 @@ function createJobCardElement(job) {
                 <span class="meta-value">📍 ${escapeHtml(addressText)}</span>
             </div>
             <div class="meta-item">
-                <span class="meta-label">Hyresgäst / Lägenhet</span>
-                <span class="meta-value">🏠 ${escapeHtml(exactLocation)}</span>
+                <span class="meta-label">Lägenhetskod</span>
+                <span class="meta-value">🔑 <strong>${escapeHtml(lghKod || lghNr || '—')}</strong>${lghNr && lghKod ? ` (Lgh ${escapeHtml(lghNr)})` : ''}</span>
             </div>
             <div class="meta-item">
-                <span class="meta-label">Bovärd</span>
-                <span class="meta-value">👤 ${escapeHtml(bovardText)}</span>
+                <span class="meta-label">Hyresgäst</span>
+                <span class="meta-value">👤 ${escapeHtml(tenantName || 'Ej angiven')}</span>
             </div>
         </div>
 
