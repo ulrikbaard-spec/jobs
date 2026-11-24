@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Tvåa i markplan · Kärrgruvan, Norberg · AB-Hem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="lagenhet-forms-style.css">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8faf9;
+            color: #24312b;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Demo Header (efterliknar ab-hem.se) */
+        .site-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2ebe5;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #173c36;
+        }
+
+        .brand-logo-mock {
+            font-size: 20px;
+            font-weight: 800;
+            color: #173c36;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-logo-mock span {
+            color: #315847;
+            font-weight: 600;
+            font-size: 13px;
+            display: block;
+            margin-top: -3px;
+        }
+
+        .header-back-link {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #315847;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: #edf3ee;
+            transition: all 0.2s;
+        }
+
+        .header-back-link:hover {
+            background: #dfece1;
+            color: #173c36;
+        }
+
+        /* Layout Container */
+        .page-container {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 28px 20px 60px;
+        }
+
+        /* Brödsmulor & Topp */
+        .breadcrumbs {
+            font-size: 12.5px;
+            color: #72837b;
+            margin-bottom: 12px;
+        }
+
+        .breadcrumbs a {
+            color: #5f7069;
+            text-decoration: none;
+        }
+
+        .apartment-header {
+            margin-bottom: 22px;
+        }
+
+        .tag-location {
+            display: inline-block;
+            font-size: 11.5px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #315847;
+            background: rgba(49, 88, 71, 0.09);
+            padding: 4px 10px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+        }
+
+        .apartment-title {
+            font-size: clamp(26px, 4vw, 36px);
+            font-weight: 800;
+            color: #173c36;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .apartment-sub {
+            font-size: 16px;
+            color: #5f7069;
+        }
+
+        /* 2-Kolumners Grid (Vänster innehåll + Höger formulär) */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1.45fr 1fr;
+            gap: 36px;
+            align-items: flex-start;
+        }
+
+        /* Vänster Innehåll */
+        .main-content {
+            min-width: 0;
+        }
+
+        /* Galleri */
+        .apartment-gallery {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: 155px 155px;
+            gap: 12px;
+            margin-bottom: 30px;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .gallery-item {
+            position: relative;
+            background: #e2ede5;
+            overflow: hidden;
+        }
+
+        .gallery-item.main {
+            grid-row: span 2;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.03);
+        }
+
+        /* Snabba Nyckeltal / Fakta */
+        .quick-facts-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            background: #ffffff;
+            border: 1px solid #dce6df;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(23, 60, 54, 0.04);
+        }
+
+        .fact-col {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .fact-col .label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #72837b;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .fact-col .val {
+            font-size: 17px;
+            font-weight: 800;
+            color: #173c36;
+        }
+
+        /* Beskrivning */
+        .apartment-desc {
+            background: #ffffff;
+            border: 1px solid #dce6df;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 30px;
+        }
+
+        .apartment-desc h2 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #173c36;
+            margin-bottom: 14px;
+        }
+
+        .apartment-desc p {
+            font-size: 14.5px;
+            color: #40524a;
+            line-height: 1.65;
+            margin-bottom: 16px;
+        }
+
+        .apartment-desc p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Höger Kolumn (Sidebar) */
+        .sidebar-column {
+            position: sticky;
+            top: 86px;
+        }
+
+        .demo-note-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff8e6;
+            border: 1px solid #f0dcab;
+            color: #875a00;
+            font-size: 12.5px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+        }
+
+        /* Responsiv mobil */
+        @media (max-width: 960px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .sidebar-column {
+                position: static;
+            }
+
+            .apartment-gallery {
+                grid-template-columns: 1fr;
+                grid-template-rows: 240px 140px;
+            }
+
+            .gallery-item.secondary-2 {
+                display: none;
+            }
+
+            .quick-facts-bar {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- MOCK SITE HEADER -->
+    <header class="site-header">
+        <a href="https://ab-hem.se/" class="header-brand">
+            <div class="brand-logo-mock">
+                AB-hem
+                <span>naturnära bostäder</span>
+            </div>
+        </a>
+        <a href="https://ab-hem.se/lediga_bostader/" class="header-back-link">
+            ← Alla lediga bostäder
+        </a>
+    </header>
+
+    <div class="page-container">
+
+        <!-- BRÖDSMULOR -->
+        <nav class="breadcrumbs" aria-label="Brödsmulor">
+            <a href="https://ab-hem.se/">Start</a> /
+            <a href="https://ab-hem.se/lediga_bostader/">Lediga bostäder</a> /
+            <span>Norberg · Kärrgruvan</span>
+        </nav>
+
+        <!-- OBJEKTS-HEADER -->
+        <div class="apartment-header">
+            <span class="tag-location">Västmanland · Norberg</span>
+            <h1 class="apartment-title">Tvåa i markplan – Kärrgruvan</h1>
+            <p class="apartment-sub">Trevlig och rymlig 2:a med uteplats i lugnt och naturskönt område.</p>
+        </div>
+
+        <!-- ==================================================================
+             NYCKELKOMPONENT 1: INTRESSEANMÄLAN LIGHT (HÖGST UPP)
+             Detta formulär fångar snabbt upp intressenter innan de scrollar!
+             ================================================================== -->
+        <section aria-label="Snabbintresse">
+            <div class="ab-light-form">
+                <div class="ab-light-header">
+                    <span class="ab-light-badge">Snabbintresse</span>
+                    <h2 class="ab-light-title">Vill du veta mer om den här lägenheten?</h2>
+                    <p class="ab-light-desc">Lämna dina kontaktuppgifter nedan så kontaktar vi dig för frågor eller visning.</p>
+                </div>
+
+                <form action="#" method="post" class="ab-light-fields" onsubmit="event.preventDefault(); alert('Tack för ditt intresse! Vi kontaktar dig så snart vi kan.');">
+                    <div class="ab-light-field">
+                        <label for="demo-name">Namn <span class="req">*</span></label>
+                        <input type="text" id="demo-name" name="your-name" placeholder="För- och efternamn" required>
+                    </div>
+
+                    <div class="ab-light-field">
+                        <label for="demo-phone">Telefonnummer <span class="req">*</span></label>
+                        <input type="tel" id="demo-phone" name="your-telefonnummer" placeholder="070-123 45 67" required>
+                    </div>
+
+                    <div class="ab-light-field">
+                        <label for="demo-email">E-postadress <span class="req">*</span></label>
+                        <input type="email" id="demo-email" name="your-email" placeholder="namn@exempel.se" required>
+                    </div>
+
+                    <div class="ab-light-btn-wrap">
+                        <input type="submit" value="Kontakta mig" class="ab-light-submit">
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- TVÅKOLUMNERS LAYOUT: INNEHÅLL + STORA FORMULÄRET -->
+        <div class="layout-grid">
+
+            <!-- VÄNSTER: BILDER & FAKTA -->
+            <main class="main-content">
+
+                <!-- Galleri -->
+                <div class="apartment-gallery">
+                    <div class="gallery-item main">
+                        <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80" alt="Vardagsrum">
+                    </div>
+                    <div class="gallery-item secondary-1">
+                        <img src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80" alt="Kök">
+                    </div>
+                    <div class="gallery-item secondary-2">
+                        <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600&auto=format&fit=crop&q=80" alt="Sovrum">
+                    </div>
+                </div>
+
+                <!-- Nyckelfakta -->
+                <div class="quick-facts-bar">
+                    <div class="fact-col">
+                        <span class="label">Storlek</span>
+                        <span class="val">2 rum & kök</span>
+                    </div>
+                    <div class="fact-col">
+                        <span class="label">Boarea</span>
+                        <span class="val">62 m²</span>
+                    </div>
+                    <div class="fact-col">
+                        <span class="label">Månadshyra</span>
+                        <span class="val">5 890 kr/mån</span>
+                    </div>
+                    <div class="fact-col">
+                        <span class="label">Inflyttning</span>
+                        <span class="val">Omgående / Enl. ök</span>
+                    </div>
+                </div>
+
+                <!-- Beskrivning -->
+                <article class="apartment-desc">
+                    <h2>Om lägenheten</h2>
+                    <p>
+                        Välkommen till denna trevliga tvåa belägen på markplan i natursköna Kärrgruvan, strax utanför Norbergs centrum. Lägenheten har en öppen och luftig planlösning med generöst ljusinsläpp från fönster i två väderstreck.
+                    </p>
+                    <p>
+                        Från vardagsrummet når du den egna uteplatsen där du kan njuta av eftermiddagssolen. Köket är välutrustat med goda förvaringsmöjligheter och plats för matbord. Helkaklat badrum och rymligt sovrum med inbyggda garderober.
+                    </p>
+                    <p>
+                        I hyran ingår värme och vatten. Fiber finns indraget i fastigheten. Parkeringsplats och garage finns att hyra i anslutning till huset.
+                    </p>
+                </article>
+
+            </main>
+
+            <!-- ==============================================================
+                 NYCKELKOMPONENT 2: DET STORA HÖGERFORMULÄRET (UPPFRÄSCHAD DESIGN)
+                 Detta är det fullständiga formuläret i högerspalten.
+                 ============================================================== -->
+            <aside class="sidebar-column">
+
+                <div class="demo-note-badge">
+                    <span>✨</span>
+                    <span>Här är det uppfräschade högerformuläret</span>
+                </div>
+
+                <div class="ab-sidebar-form-card">
+                    <form action="#" method="post" onsubmit="event.preventDefault(); alert('Fullständig intresseanmälan skickad!');">
+                        
+                        <p>
+                            <label for="full-name">För- och efternamn *</label>
+                            <input type="text" id="full-name" name="your-name" placeholder="För- och efternamn" required>
+                        </p>
+
+                        <p>
+                            <label for="full-pnr">Personnummer (12 siffror) *</label>
+                            <input type="text" id="full-pnr" name="your-personnummer" placeholder="ÅÅÅÅMMDDXXXX" required>
+                        </p>
+
+                        <p>
+                            <label for="full-email">E-postadress *</label>
+                            <input type="email" id="full-email" name="your-email" placeholder="din.epost@exempel.se" required>
+                        </p>
+
+                        <p>
+                            <label for="full-phone">Telefonnummer *</label>
+                            <input type="tel" id="full-phone" name="your-telefonnummer" placeholder="070-123 45 67" required>
+                        </p>
+
+                        <p>
+                            <label for="full-inkomst">Månadsinkomst före skatt (kr) *</label>
+                            <input type="text" id="full-inkomst" name="inkomst" placeholder="T.ex. 28 500" required>
+                        </p>
+
+                        <p>
+                            <label for="full-typ">Huvudsaklig inkomstkälla *</label>
+                            <select id="full-typ" name="typavinkomst" required>
+                                <option value="">– Välj ett alternativ –</option>
+                                <option value="Arbete">Arbete (fast eller visstid)</option>
+                                <option value="Pension">Pension</option>
+                                <option value="Eget företag">Eget företag</option>
+                                <option value="Studier">Studier / CSN</option>
+                                <option value="Annat">Annat</option>
+                            </select>
+                        </p>
+
+                        <p>
+                            <label for="full-husdjur">Har du husdjur? *</label>
+                            <select id="full-husdjur" name="Husdjur" required>
+                                <option value="">– Välj ett alternativ –</option>
+                                <option value="Nej">Nej</option>
+                                <option value="Ja">Ja</option>
+                            </select>
+                        </p>
+
+                        <p>
+                            <label for="full-rokare">Är du rökare? *</label>
+                            <select id="full-rokare" name="Rokare" required>
+                                <option value="">– Välj ett alternativ –</option>
+                                <option value="Nej">Nej</option>
+                                <option value="Ja">Ja</option>
+                            </select>
+                        </p>
+
+                        <p>
+                            <label for="full-msg">Berätta kort om dig själv och varför du söker *</label>
+                            <textarea id="full-msg" name="personligtbrev" rows="4" placeholder="Skriv några rader om dig och eventuella medboende..." required></textarea>
+                        </p>
+
+                        <p>
+                            <input type="submit" value="Skicka fullständig intresseanmälan" class="wpcf7-submit">
+                        </p>
+
+                    </form>
+                </div>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

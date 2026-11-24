@@ -1,0 +1,375 @@
+/* ==========================================================================
+   AB-HEM: DESIGN FÖR LÄGENHETSSIDOR / LEDIGA BOSTÄDER
+   1. "Intresseanmälan Light" (Snabbintresse högst upp)
+   2. Högerkolumnens formulär (Fullständig intresseanmälan)
+   ========================================================================== */
+
+/* ==========================================================================
+   DEL 1: INTRESSEANMÄLAN LIGHT (SNABBINTRESSE I TOPPEN)
+   ========================================================================== */
+
+.ab-light-form {
+    --green: #315847;
+    --green-hover: #244537;
+    --dark: #173c36;
+    --light-bg: #edf3ee;
+    --border: #d4e2d8;
+    --text: #24312b;
+    --muted: #5f7069;
+    --white: #ffffff;
+
+    background: var(--light-bg) !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 18px !important;
+    padding: 24px 28px !important;
+    margin: 0 0 32px 0 !important;
+    box-shadow: 0 6px 20px rgba(23, 60, 54, 0.05) !important;
+    box-sizing: border-box !important;
+    font-family: inherit !important;
+    position: relative !important;
+    clear: both !important;
+}
+
+.ab-light-form *,
+.ab-light-form *::before,
+.ab-light-form *::after {
+    box-sizing: border-box !important;
+}
+
+/* Header */
+.ab-light-header {
+    margin-bottom: 18px !important;
+    text-align: left !important;
+}
+
+.ab-light-badge {
+    display: inline-block !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    color: var(--green) !important;
+    background: rgba(49, 88, 71, 0.1) !important;
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+    margin-bottom: 8px !important;
+}
+
+.ab-light-title {
+    font-size: clamp(20px, 2.5vw, 24px) !important;
+    font-weight: 800 !important;
+    color: var(--dark) !important;
+    margin: 0 0 6px 0 !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.015em !important;
+}
+
+.ab-light-desc {
+    font-size: 14.5px !important;
+    color: var(--muted) !important;
+    margin: 0 !important;
+    line-height: 1.5 !important;
+}
+
+/* Fält-layout: 3 fält i bredd på desktop, knapp på slutet */
+.ab-light-fields {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) auto !important;
+    gap: 14px !important;
+    align-items: flex-end !important;
+}
+
+.ab-light-field {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+}
+
+.ab-light-field label {
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    color: var(--dark) !important;
+    margin: 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.2 !important;
+}
+
+.ab-light-field label .req {
+    color: #c53030 !important;
+}
+
+.ab-light-field input[type="text"],
+.ab-light-field input[type="tel"],
+.ab-light-field input[type="email"] {
+    width: 100% !important;
+    height: 48px !important;
+    background: var(--white) !important;
+    border: 1.5px solid #c9d8ce !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    color: var(--text) !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+}
+
+.ab-light-field input:focus {
+    border-color: var(--green) !important;
+    box-shadow: 0 0 0 3px rgba(49, 88, 71, 0.16) !important;
+    outline: none !important;
+    background: #ffffff !important;
+}
+
+/* Submit-knapp för Light */
+.ab-light-btn-wrap {
+    display: flex !important;
+    align-items: flex-end !important;
+}
+
+.ab-light-form .ab-light-submit,
+.ab-light-form input[type="submit"].ab-light-submit {
+    height: 48px !important;
+    padding: 0 24px !important;
+    background: var(--green) !important;
+    background-color: var(--green) !important;
+    color: #ffffff !important;
+    font-size: 14.5px !important;
+    font-weight: 800 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    white-space: nowrap !important;
+    box-shadow: 0 2px 8px rgba(49, 88, 71, 0.25) !important;
+}
+
+.ab-light-form .ab-light-submit:hover,
+.ab-light-form input[type="submit"].ab-light-submit:hover {
+    background: var(--green-hover) !important;
+    background-color: var(--green-hover) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 5px 14px rgba(49, 88, 71, 0.35) !important;
+}
+
+/* Mobilanpassning för Light */
+@media (max-width: 900px) {
+    .ab-light-fields {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .ab-light-btn-wrap {
+        grid-column: span 2 !important;
+    }
+    .ab-light-form .ab-light-submit,
+    .ab-light-form input[type="submit"].ab-light-submit {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .ab-light-form {
+        padding: 18px 16px !important;
+        margin-bottom: 24px !important;
+        border-radius: 14px !important;
+    }
+    .ab-light-fields {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    .ab-light-btn-wrap {
+        grid-column: span 1 !important;
+        margin-top: 4px !important;
+    }
+}
+
+
+/* ==========================================================================
+   DEL 2: DET STORA HÖGERFORMULÄRET (FULLSTÄNDIG INTRESSEANMÄLAN)
+   Gäller Contact Form 7-formulär i högerspalten på lägenhetssidor
+   ========================================================================== */
+
+.sidebar .wpcf7,
+.flex_column.av_one_third .wpcf7,
+.flex_column.av_two_fifth .wpcf7,
+.ab-sidebar-form-card,
+#top .widget_text .wpcf7 {
+    background: #ffffff !important;
+    border: 1.5px solid #dce6df !important;
+    border-radius: 18px !important;
+    padding: 28px 24px !important;
+    box-shadow: 0 8px 28px rgba(23, 60, 54, 0.07) !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+}
+
+.sidebar .wpcf7::before,
+.flex_column.av_one_third .wpcf7::before,
+.flex_column.av_two_fifth .wpcf7::before,
+.ab-sidebar-form-card::before {
+    content: "Fullständig intresseanmälan" !important;
+    display: block !important;
+    font-size: 19px !important;
+    font-weight: 800 !important;
+    color: #173c36 !important;
+    letter-spacing: -0.015em !important;
+    margin-bottom: 6px !important;
+}
+
+.sidebar .wpcf7 p,
+.flex_column.av_one_third .wpcf7 p,
+.flex_column.av_two_fifth .wpcf7 p,
+.ab-sidebar-form-card p {
+    margin: 0 0 16px 0 !important;
+    font-size: 13.5px !important;
+    color: #24312b !important;
+    line-height: 1.4 !important;
+}
+
+.sidebar .wpcf7 label,
+.flex_column.av_one_third .wpcf7 label,
+.flex_column.av_two_fifth .wpcf7 label,
+.ab-sidebar-form-card label {
+    display: block !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    color: #173c36 !important;
+    margin-bottom: 6px !important;
+    letter-spacing: 0.02em !important;
+}
+
+.sidebar .wpcf7 input[type="text"],
+.sidebar .wpcf7 input[type="email"],
+.sidebar .wpcf7 input[type="tel"],
+.sidebar .wpcf7 input[type="number"],
+.sidebar .wpcf7 select,
+.sidebar .wpcf7 textarea,
+.flex_column.av_one_third .wpcf7 input[type="text"],
+.flex_column.av_one_third .wpcf7 input[type="email"],
+.flex_column.av_one_third .wpcf7 input[type="tel"],
+.flex_column.av_one_third .wpcf7 select,
+.flex_column.av_one_third .wpcf7 textarea,
+.flex_column.av_two_fifth .wpcf7 input[type="text"],
+.flex_column.av_two_fifth .wpcf7 input[type="email"],
+.flex_column.av_two_fifth .wpcf7 input[type="tel"],
+.flex_column.av_two_fifth .wpcf7 select,
+.flex_column.av_two_fifth .wpcf7 textarea,
+.ab-sidebar-form-card input,
+.ab-sidebar-form-card select,
+.ab-sidebar-form-card textarea {
+    width: 100% !important;
+    background: #fbfdfc !important;
+    border: 1.5px solid #d4ded8 !important;
+    border-radius: 10px !important;
+    padding: 11px 14px !important;
+    font-size: 14px !important;
+    color: #24312b !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+    line-height: normal !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+}
+
+.sidebar .wpcf7 input:focus,
+.sidebar .wpcf7 select:focus,
+.sidebar .wpcf7 textarea:focus,
+.flex_column.av_one_third .wpcf7 input:focus,
+.flex_column.av_one_third .wpcf7 select:focus,
+.flex_column.av_one_third .wpcf7 textarea:focus,
+.flex_column.av_two_fifth .wpcf7 input:focus,
+.flex_column.av_two_fifth .wpcf7 select:focus,
+.flex_column.av_two_fifth .wpcf7 textarea:focus,
+.ab-sidebar-form-card input:focus,
+.ab-sidebar-form-card select:focus,
+.ab-sidebar-form-card textarea:focus {
+    background: #ffffff !important;
+    border-color: #315847 !important;
+    box-shadow: 0 0 0 3px rgba(49, 88, 71, 0.16) !important;
+    outline: none !important;
+}
+
+.sidebar .wpcf7 textarea,
+.flex_column.av_one_third .wpcf7 textarea,
+.flex_column.av_two_fifth .wpcf7 textarea,
+.ab-sidebar-form-card textarea {
+    min-height: 95px !important;
+    resize: vertical !important;
+    line-height: 1.5 !important;
+}
+
+.sidebar .wpcf7 select,
+.flex_column.av_one_third .wpcf7 select,
+.flex_column.av_two_fifth .wpcf7 select,
+.ab-sidebar-form-card select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23315847' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 13px !important;
+    padding-right: 36px !important;
+    cursor: pointer !important;
+}
+
+.sidebar .wpcf7 input[type="submit"],
+.flex_column.av_one_third .wpcf7 input[type="submit"],
+.flex_column.av_two_fifth .wpcf7 input[type="submit"],
+.ab-sidebar-form-card input[type="submit"],
+#top .wpcf7-submit {
+    width: 100% !important;
+    background: #315847 !important;
+    background-color: #315847 !important;
+    background-image: none !important;
+    color: #ffffff !important;
+    font-size: 15.5px !important;
+    font-weight: 800 !important;
+    padding: 14px 20px !important;
+    border-radius: 12px !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 4px 14px rgba(49, 88, 71, 0.22) !important;
+    letter-spacing: 0.01em !important;
+    margin-top: 10px !important;
+    display: block !important;
+    text-align: center !important;
+}
+
+.sidebar .wpcf7 input[type="submit"]:hover,
+.flex_column.av_one_third .wpcf7 input[type="submit"]:hover,
+.flex_column.av_two_fifth .wpcf7 input[type="submit"]:hover,
+.ab-sidebar-form-card input[type="submit"]:hover,
+#top .wpcf7-submit:hover {
+    background: #244537 !important;
+    background-color: #244537 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 22px rgba(49, 88, 71, 0.32) !important;
+    color: #ffffff !important;
+}
+
+.wpcf7-response-output {
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+    font-size: 13.5px !important;
+    margin: 14px 0 0 0 !important;
+    line-height: 1.45 !important;
+}
+
+.wpcf7 form.sent .wpcf7-response-output {
+    background: #edf7ee !important;
+    border: 1.5px solid #b7dfbc !important;
+    color: #1e4620 !important;
+}
+
+.wpcf7 form.invalid .wpcf7-response-output,
+.wpcf7 form.unaccepted .wpcf7-response-output {
+    background: #fdf2f2 !important;
+    border: 1.5px solid #f8b4b4 !important;
+    color: #9b1c1c !important;
+}
+
+.wpcf7-not-valid-tip {
+    font-size: 12px !important;
+    color: #c53030 !important;
+    margin-top: 4px !important;
+}
