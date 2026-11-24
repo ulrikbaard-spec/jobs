@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#173c36">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Felanmälan för hyresgäster hos AB-Hem. Information om egenansvar, skadedjur (Anticimex), akut jour samt formulär för felanmälan online.">
+    <title>Felanmälan · AB-Hem</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --green: #315847;
+            --green-hover: #244537;
+            --dark: #173c36;
+            --light: #edf3ee;
+            --cream: #f4f0e7;
+            --cream-border: #e6dfd1;
+            --text: #24312b;
+            --muted: #5f7069;
+            --line: #dbe5df;
+            --white: #ffffff;
+            --red-bg: #fdf2f2;
+            --red-border: #f8b4b4;
+            --red-text: #9b1c1c;
+            --yellow-bg: #fffbeb;
+            --yellow-border: #fde68a;
+            --yellow-text: #92400e;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-sm: 0 2px 8px rgba(23, 60, 54, 0.05);
+            --shadow-md: 0 8px 24px rgba(23, 60, 54, 0.08);
+            --shadow-lg: 0 16px 36px rgba(23, 60, 54, 0.12);
+            --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(180deg, #f7faf8 0%, #edf3ee 100%);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* =========================================================
+           TOP NAV / HEADER
+           ========================================================= */
+
+        .site-header {
+            background: var(--dark);
+            color: #ffffff;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .brand-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: #ffffff;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.01em;
+        }
+
+        .brand-text span {
+            font-size: 12px;
+            color: #a8c4b5;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emergency-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            color: #fca5a5;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .emergency-pill:hover {
+            background: rgba(220, 38, 38, 0.3);
+            color: #ffffff;
+        }
+
+        /* =========================================================
+           PAGE HERO
+           ========================================================= */
+
+        .hero-section {
+            background:
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.08), transparent 30%),
+                linear-gradient(135deg, #173c36 0%, #294d3e 60%, #315847 100%);
+            color: #ffffff;
+            padding: 48px 24px 54px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .hero-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #a8d5be;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+        }
+
+        .hero-title {
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.025em;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(15px, 2vw, 17px);
+            color: #d1e4da;
+            max-width: 720px;
+            line-height: 1.55;
+        }
+
+        /* =========================================================
+           MAIN 2-COLUMN LAYOUT
+           ========================================================= */
+
+        .main-container {
+            max-width: 1180px;
+            margin: -24px auto 60px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        @media (max-width: 960px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                margin-top: 20px;
+                gap: 24px;
+            }
+        }
+
+        /* =========================================================
+           VÄNSTERKOLUMN: INFOGUIDE & FAQ-KORT
+           ========================================================= */
+
+        .info-column {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .info-card {
+            background: var(--white);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .info-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .info-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 20px;
+        }
+
+        .info-card-title-group h2 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--dark);
+            line-height: 1.3;
+        }
+
+        .info-card-tag {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--green);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .info-checklist {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.5;
+        }
+
+        .check-icon {
+            color: var(--green);
+            flex-shrink: 0;
+            font-size: 16px;
+            margin-top: 1px;
+        }
+
+        .check-item strong {
+            color: var(--dark);
+        }
+
+        .warning-callout {
+            background: #fff8e8;
+            border: 1px solid #f0dfa8;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #7c4a03;
+            margin-top: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        /* Skadedjur / Anticimex card styling */
+        .card-anticimex {
+            background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
+            border-left: 4px solid #1f7a4d;
+        }
+
+        .card-anticimex .info-card-icon {
+            background: #eef7f2;
+            color: #1f7a4d;
+        }
+
+        .anticimex-box {
+            background: var(--light);
+            border: 1px solid #cfe0d5;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin: 14px 0 10px;
+            font-size: 13.5px;
+        }
+
+        .anticimex-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px dashed rgba(23, 60, 54, 0.15);
+        }
+
+        .anticimex-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .anticimex-phone-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--green);
+            color: #ffffff;
+            font-weight: 800;
+            padding: 8px 16px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: var(--transition);
+        }
+
+        .anticimex-phone-btn:hover {
+            background: var(--green-hover);
+        }
+
+        /* Akut jour kort */
+        .card-emergency {
+            background: var(--red-bg);
+            border: 1px solid var(--red-border);
+            border-left: 4px solid #dc2626;
+        }
+
+        .card-emergency .info-card-icon {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .card-emergency h2 {
+            color: var(--red-text);
+        }
+
+        .emergency-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13.5px;
+            color: #7f1d1d;
+            margin: 10px 0 14px;
+        }
+
+        .emergency-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .emergency-phone-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #dc2626;
+            color: #ffffff;
+            font-weight: 800;
+            padding: 10px 18px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .emergency-phone-btn:hover {
+            background: #b91c1c;
+        }
+
+        /* =========================================================
+           HÖGERKOLUMN: FORMULÄRET
+           ========================================================= */
+
+        .form-column {
+            background: var(--white);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            padding: 32px 34px;
+            box-shadow: var(--shadow-md);
+        }
+
+        @media (max-width: 600px) {
+            .form-column {
+                padding: 22px 18px;
+            }
+        }
+
+        .form-header {
+            margin-bottom: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .form-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 6px;
+            letter-spacing: -0.01em;
+        }
+
+        .form-desc {
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .form-step-title {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--green);
+            margin: 22px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-step-title::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        @media (max-width: 580px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .form-group label .required {
+            color: #dc2626;
+            margin-left: 2px;
+        }
+
+        .form-group label .hint {
+            font-size: 11.5px;
+            font-weight: 500;
+            color: var(--muted);
+            margin-left: 4px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text);
+            background: #ffffff;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(49, 88, 71, 0.12);
+        }
+
+        .form-select {
+            height: 44px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23173c36' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 110px;
+            line-height: 1.5;
+        }
+
+        /* Klickbara taggar / chips för feltyp och område */
+        .chip-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .chip-label {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: #f4f7f5;
+            border: 1px solid #d3e0d8;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        .chip-label input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .chip-label:hover {
+            border-color: var(--green);
+            background: #eaf3ed;
+        }
+
+        .chip-label:has(input:checked) {
+            background: var(--green);
+            color: #ffffff;
+            border-color: var(--green);
+            box-shadow: 0 2px 6px rgba(49, 88, 71, 0.25);
+        }
+
+        /* Filuppladdning */
+        .file-upload-box {
+            border: 2px dashed #cfe0d5;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            background: #fbfdfc;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .file-upload-box:hover {
+            border-color: var(--green);
+            background: #f4f9f6;
+        }
+
+        .file-upload-box input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .upload-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .upload-hint {
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        /* Skicka-knapp */
+        .submit-btn {
+            width: 100%;
+            background: var(--green);
+            color: #ffffff;
+            border: none;
+            border-radius: 30px;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(49, 88, 71, 0.25);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .submit-btn:hover {
+            background: var(--green-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(49, 88, 71, 0.32);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.99);
+        }
+
+        /* Footer */
+        .site-footer {
+            background: var(--dark);
+            color: #a8c4b5;
+            text-align: center;
+            padding: 32px 20px;
+            font-size: 13px;
+            margin-top: 40px;
+        }
+
+        .site-footer a {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOP HEADER -->
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="https://ab-hem.se/" class="header-brand">
+                <div class="brand-badge">AB</div>
+                <div class="brand-text">
+                    <h1>AB-Hem</h1>
+                    <span>Felanmälan & Fastighetsservice</span>
+                </div>
+            </a>
+            <div class="header-actions">
+                <a href="tel:058140200" class="emergency-pill" title="Ring jouren vid akut fara">
+                    🚨 <span>Akut Jour: 0581-402 00 (val 3)</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+        <div class="hero-inner">
+            <span class="eyebrow">Service & Underhåll</span>
+            <h1 class="hero-title">Gör en felanmälan</h1>
+            <p class="hero-subtitle">
+                Här anmäler du fel eller brister i din bostad eller fastighet. Läs gärna igenom checklistan till vänster för att se vad du ansvarar för själv och vad som anmäls direkt till Anticimex eller fastighetsjouren.
+            </p>
+        </div>
+    </section>
+
+    <!-- MAIN 2-COLUMN SECTION -->
+    <main class="main-container">
+
+        <!-- VÄNSTER: INFORMATION, EGENANSVAR & ANTICIMEX -->
+        <aside class="info-column" aria-label="Information och råd före felanmälan">
+
+            <!-- 1. VAD ANSVARAR DU FÖR SJÄLV? (FAQ #75354) -->
+            <article class="info-card" id="egenansvar">
+                <div class="info-card-header">
+                    <div class="info-card-icon" style="background: #eef5f1; color: var(--green);">
+                        💡
+                    </div>
+                    <div class="info-card-title-group">
+                        <span class="info-card-tag">Bra att veta</span>
+                        <h2>Vad ansvarar du för själv?</h2>
+                    </div>
+                </div>
+
+                <p style="font-size: 13.5px; color: var(--muted); margin-bottom: 14px;">
+                    Som hyresgäst ansvarar du själv för löpande skötsel och enklare underhåll i lägenheten:
+                </p>
+
+                <ul class="info-checklist">
+                    <li class="check-item">
+                        <span class="check-icon">✓</span>
+                        <div>
+                            <strong>Lampor, lysrör & säkringar:</strong><br>
+                            Byte av glödlampor, lysrör, glimtändare och säkringar. Detta gäller även belysning i kyl/frys, ugn, spisfläkt och badrumsskåp.
+                        </div>
+                    </li>
+                    <li class="check-item">
+                        <span class="check-icon">✓</span>
+                        <div>
+                            <strong>Fettfilter i spisfläkt:</strong><br>
+                            Regelbunden diskning och rengöring av fettfilter i köksfläkt och dragkåpa för bra ventilation och brandsäkerhet.
+                        </div>
+                    </li>
+                    <li class="check-item">
+                        <span class="check-icon">✓</span>
+                        <div>
+                            <strong>Rengöring av avlopp & vattenlås:</strong><br>
+                            Rensning av bottenventil, vattenlås under handfat/diskho samt golvbrunn i badrum.
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="warning-callout">
+                    <span>⚠️</span>
+                    <div>
+                        <strong>Stopp i avloppet?</strong> Rensa alltid vattenlås och brunn först. Rinner det fortfarande inte undan, eller om det läcker, gör du en felanmälan i formuläret. <em>Obs: Kaustiksoda är strängt förbjudet – använd miljövänliga propplösare!</em>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 2. SKADEDJUR & INSEKTER (FAQ #75407 - ANTICIMEX) -->
+            <article class="info-card card-anticimex" id="skadedjur">
+                <div class="info-card-header">
+                    <div class="info-card-icon">
+                        🐜
+                    </div>
+                    <div class="info-card-title-group">
+                        <span class="info-card-tag" style="color: #1f7a4d;">Direktanmälan</span>
+                        <h2>Skadedjur eller insekter?</h2>
+                    </div>
+                </div>
+
+                <p style="font-size: 13.5px; color: var(--text); line-height: 1.5;">
+                    Har du problem med getingar, vägglöss, kackerlackor, myror, råttor eller andra skadedjur? Enligt hyreslagen är du <strong>skyldig att anmäla detta omgående</strong> direkt till Anticimex.
+                </p>
+
+                <div class="anticimex-box">
+                    <div class="anticimex-row">
+                        <span style="font-weight: 600; color: var(--muted);">Saneringsbolag:</span>
+                        <strong style="color: var(--dark);">Anticimex</strong>
+                    </div>
+                    <div class="anticimex-row">
+                        <span style="font-weight: 600; color: var(--muted);">AB-Hems kundnummer:</span>
+                        <strong style="color: var(--dark); font-size: 14px; letter-spacing: 0.04em;">4177073</strong>
+                    </div>
+                    <div class="anticimex-row">
+                        <span style="font-weight: 600; color: var(--muted);">Fastighetsförsäkring:</span>
+                        <strong style="color: var(--dark);">If Skadeförsäkring</strong>
+                    </div>
+                    <div class="anticimex-row">
+                        <span style="font-weight: 600; color: var(--muted);">Kostnad för dig:</span>
+                        <strong style="color: #15803d;">0 kr (Kostnadsfritt)</strong>
+                    </div>
+                </div>
+
+                <p style="font-size: 12.5px; color: var(--muted); margin-bottom: 8px;">
+                    Ring Anticimex direkt så bokar de sanering. Meddela oss sedan på <a href="mailto:info@ab-hem.se" style="color: var(--green); font-weight: 700;">info@ab-hem.se</a> så att vi vet att ärendet pågår.
+                </p>
+
+                <a href="tel:0752451000" class="anticimex-phone-btn">
+                    📞 Ring Anticimex: 075-24 51 000
+                </a>
+            </article>
+
+            <!-- 3. AKUT JOUR DYGNET RUNT -->
+            <article class="info-card card-emergency" id="akut-jour">
+                <div class="info-card-header">
+                    <div class="info-card-icon">
+                        🚨
+                    </div>
+                    <div class="info-card-title-group">
+                        <span class="info-card-tag" style="color: #dc2626;">Dygnet runt</span>
+                        <h2>Akuta ärenden utanför kontorstid</h2>
+                    </div>
+                </div>
+
+                <p style="font-size: 13.5px; color: #7f1d1d;">
+                    Vid akuta händelser som innebär omedelbar fara för fastighet eller person:
+                </p>
+
+                <ul class="emergency-list">
+                    <li>⚡ Omfattande strömavbrott i hela lägenheten</li>
+                    <li>💧 Kraftig vattenläcka eller översvämning</li>
+                    <li>❄️ Total avsaknad av värme mitt i vintern</li>
+                    <li>🔥 Brand eller rökutveckling (ring alltid 112 först)</li>
+                </ul>
+
+                <a href="tel:058140200" class="emergency-phone-btn">
+                    📞 Ring fastighetsjouren: 0581-402 00 (val 3)
+                </a>
+            </article>
+
+        </aside>
+
+        <!-- HÖGER: FELANMÄLANSFORMULÄRET -->
+        <section class="form-column" aria-label="Formulär för felanmälan">
+
+            <div class="form-header">
+                <h2 class="form-title">Skicka in felanmälan</h2>
+                <p class="form-desc">
+                    Fyll i uppgifterna nedan så hanterar vår kundtjänst och din lokala fastighetsskötare ärendet så snart som möjligt.
+                </p>
+            </div>
+
+            <form action="https://ab-hem.se/felanmalan/#wpcf7-f642-p24-o1" method="post" enctype="multipart/form-data" id="abhem-felanmalan-form">
+
+                <!-- 1. DINA KONTAKTUPPGIFTER -->
+                <div class="form-step-title">1. Kontakt- och lägenhetsuppgifter</div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="your-name">Ditt namn <span class="required">*</span></label>
+                        <input type="text" id="your-name" name="your-name" class="form-input" placeholder="För- och efternamn" required autocomplete="name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="your-phone">Telefonnummer <span class="required">*</span></label>
+                        <input type="tel" id="your-phone" name="your-phone" class="form-input" placeholder="070-123 45 67" required autocomplete="tel">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="your-email">E-postadress <span class="required">*</span> <span class="hint">(Viktigt – svar skickas hit)</span></label>
+                        <input type="email" id="your-email" name="your-email" class="form-input" placeholder="namn@exempel.se" required autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="your-address">Din adress <span class="required">*</span></label>
+                        <input type="text" id="your-address" name="your-address" class="form-input" placeholder="Gatuadress & ort" required autocomplete="street-address">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lgh-nr">AB-Hem lägenhetskod <span class="hint">(5 siffror)</span></label>
+                        <input type="text" id="lgh-nr" name="lgh-nr" class="form-input" placeholder="T.ex. 12045" maxlength="5" pattern="\d{5}" inputmode="numeric">
+                    </div>
+                </div>
+
+                <!-- 2. TILLTRÄDE & HUSDJUR -->
+                <div class="form-step-title">2. Tillträde och husdjur</div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="select-tilltrade">Tillträde för fastighetsskötare</label>
+                        <select id="select-tilltrade" name="select-tilltrade" class="form-select">
+                            <option value="Huvudnyckel får användas">Huvudnyckel får användas (Snabbast åtgärd)</option>
+                            <option value="Huvudnyckel får INTE användas">Huvudnyckel får INTE användas (Ring innan)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="select-husdjur">Husdjur i bostaden</label>
+                        <select id="select-husdjur" name="select-husdjur" class="form-select">
+                            <option value="Finns ej">Finns ej</option>
+                            <option value="Hund">Hund finns i lägenheten</option>
+                            <option value="Katt">Katt finns i lägenheten</option>
+                            <option value="Annat">Annat djur</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 3. VAD GÄLLER FELET? -->
+                <div class="form-step-title">3. Vad gäller felet?</div>
+
+                <div class="form-group full-width" style="margin-bottom: 14px;">
+                    <label>Typ av fel <span class="hint">(Välj ett eller flera alternativ)</span></label>
+                    <div class="chip-grid">
+                        <label class="chip-label"><input type="checkbox" name="checkbox-typ[]" value="Värme"><span>🌡️ Värme</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-typ[]" value="Vatten"><span>💧 Vatten</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-typ[]" value="Avlopp"><span>🚿 Avlopp</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-typ[]" value="El"><span>⚡ El</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-typ[]" value="Fönster"><span>🪟 Fönster</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-typ[]" value="Dörr"><span>🚪 Dörr</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-typ[]" value="Lås"><span>🔑 Lås</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-typ[]" value="Övrigt"><span>⚙️ Övrigt</span></label>
+                    </div>
+                </div>
+
+                <div class="form-group full-width" style="margin-bottom: 14px;">
+                    <label>I vilket rum / utrymme? <span class="hint">(Välj ett eller flera)</span></label>
+                    <div class="chip-grid">
+                        <label class="chip-label"><input type="checkbox" name="checkbox-omrade[]" value="Kök"><span>Kök</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-omrade[]" value="Badrum/WC"><span>Badrum / WC</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-omrade[]" value="Hall"><span>Hall</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-omrade[]" value="Vardagsrum"><span>Vardagsrum</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-omrade[]" value="Sovrum"><span>Sovrum</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-omrade[]" value="Tvättstuga"><span>Tvättstuga</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-omrade[]" value="Trapphus"><span>Trapphus</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-omrade[]" value="Förråd"><span>Förråd</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-omrade[]" value="Garage/P-plats"><span>Garage / P-plats</span></label>
+                        <label class="chip-label"><input type="checkbox" name="checkbox-omrade[]" value="Övrigt"><span>Övrigt</span></label>
+                    </div>
+                </div>
+
+                <div class="form-group full-width" style="margin-bottom: 16px;">
+                    <label for="your-message">Beskrivning av felet <span class="required">*</span> <span class="hint">(Beskriv gärna vad som hänt och hur länge felet funnits)</span></label>
+                    <textarea id="your-message" name="your-message" class="form-textarea" placeholder="Beskriv felet så utförligt du kan här…" required></textarea>
+                </div>
+
+                <!-- 4. BIFOGA BILD ELLER FIL -->
+                <div class="form-group full-width" style="margin-bottom: 8px;">
+                    <label>Bifoga bild eller video <span class="hint">(Frivilligt, men hjälper fastighetsskötaren att förbereda rätt reservdelar)</span></label>
+                    <label class="file-upload-box" for="file-641">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text" id="upload-status-text">Klicka för att välja eller fota med mobilen</div>
+                        <div class="upload-hint">Bilder och korta videoklipp (JPG, PNG, MP4 etc.)</div>
+                        <input type="file" id="file-641" name="file-641" accept="image/*,video/*,audio/*" onchange="document.getElementById('upload-status-text').textContent = 'Vald fil: ' + this.files[0].name">
+                    </label>
+                </div>
+
+                <!-- SKICKA-KNAPP -->
+                <button type="submit" class="submit-btn" id="btn-submit-felanmalan">
+                    <span>Skicka in felanmälan</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+
+                <p style="text-align: center; font-size: 12px; color: var(--muted); margin-top: 12px;">
+                    🔒 Dina uppgifter behandlas säkert enligt AB-Hems integritetspolicy och hyreslagen.
+                </p>
+
+            </form>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <p><strong>AB-Hem Fastigheter AB</strong> · Myntgatan 5B, 738 31 Norberg · Tel växel: 0581-402 00</p>
+        <p style="margin-top: 6px;"><a href="https://ab-hem.se/">Tillbaka till ab-hem.se</a> · <a href="https://ab-hem.se/vanliga_fragor_alla/">Vanliga frågor & svar</a></p>
+    </footer>
+
+</body>
+
+</html>
