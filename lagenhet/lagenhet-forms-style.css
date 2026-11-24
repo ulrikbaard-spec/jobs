@@ -2,6 +2,11 @@
    AB-HEM: DESIGN FÖR LÄGENHETSSIDOR / LEDIGA BOSTÄDER
    1. "Intresseanmälan Light" (Snabbintresse högst upp)
    2. Högerkolumnens formulär (Fullständig intresseanmälan)
+   
+   Instruktion:
+   Klistra in denna kod under:
+   WordPress Admin -> Utseende (Appearance) -> Anpassa (Customize) -> Extra CSS
+   eller under Enfold Theme Options -> General Styling -> Quick CSS.
    ========================================================================== */
 
 /* ==========================================================================
@@ -79,21 +84,47 @@
     align-items: flex-end !important;
 }
 
+.ab-light-form br,
+.ab-light-fields br,
+.ab-light-field br {
+    display: none !important;
+}
+
+.ab-light-form p,
+.ab-light-fields p,
+.ab-light-field p {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: contents !important;
+    line-height: normal !important;
+}
+
 .ab-light-field {
     display: flex !important;
     flex-direction: column !important;
-    gap: 6px !important;
+    gap: 4px !important;
     min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.ab-light-field .wpcf7-form-control-wrap {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
 }
 
 .ab-light-field label {
     font-size: 12.5px !important;
     font-weight: 700 !important;
     color: var(--dark) !important;
-    margin: 0 !important;
+    margin: 0 0 2px 0 !important;
+    padding: 0 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.04em !important;
     line-height: 1.2 !important;
+    display: block !important;
 }
 
 .ab-light-field label .req {
@@ -113,6 +144,7 @@
     color: var(--text) !important;
     transition: all 0.2s ease !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+    margin: 0 !important;
 }
 
 .ab-light-field input:focus {
@@ -189,6 +221,9 @@
    Gäller Contact Form 7-formulär i högerspalten på lägenhetssidor
    ========================================================================== */
 
+/* Kort-inramning för högerformuläret */
+.housing-detail-sidebar .wpcf7,
+.custom-sidebar .wpcf7,
 .sidebar .wpcf7,
 .flex_column.av_one_third .wpcf7,
 .flex_column.av_two_fifth .wpcf7,
@@ -203,6 +238,9 @@
     position: relative !important;
 }
 
+/* Rubrik / Header över högerformuläret */
+.housing-detail-sidebar .wpcf7::before,
+.custom-sidebar .wpcf7::before,
 .sidebar .wpcf7::before,
 .flex_column.av_one_third .wpcf7::before,
 .flex_column.av_two_fifth .wpcf7::before,
@@ -216,6 +254,9 @@
     margin-bottom: 6px !important;
 }
 
+/* Formflöde & Paragrafer */
+.housing-detail-sidebar .wpcf7 p,
+.custom-sidebar .wpcf7 p,
 .sidebar .wpcf7 p,
 .flex_column.av_one_third .wpcf7 p,
 .flex_column.av_two_fifth .wpcf7 p,
@@ -226,6 +267,9 @@
     line-height: 1.4 !important;
 }
 
+/* Fältetiketter i högerformuläret */
+.housing-detail-sidebar .wpcf7 label,
+.custom-sidebar .wpcf7 label,
 .sidebar .wpcf7 label,
 .flex_column.av_one_third .wpcf7 label,
 .flex_column.av_two_fifth .wpcf7 label,
@@ -238,6 +282,19 @@
     letter-spacing: 0.02em !important;
 }
 
+/* Textfält, Telefon, E-post, Nummer, m.fl. */
+.housing-detail-sidebar .wpcf7 input[type="text"],
+.housing-detail-sidebar .wpcf7 input[type="email"],
+.housing-detail-sidebar .wpcf7 input[type="tel"],
+.housing-detail-sidebar .wpcf7 input[type="number"],
+.housing-detail-sidebar .wpcf7 select,
+.housing-detail-sidebar .wpcf7 textarea,
+.custom-sidebar .wpcf7 input[type="text"],
+.custom-sidebar .wpcf7 input[type="email"],
+.custom-sidebar .wpcf7 input[type="tel"],
+.custom-sidebar .wpcf7 input[type="number"],
+.custom-sidebar .wpcf7 select,
+.custom-sidebar .wpcf7 textarea,
 .sidebar .wpcf7 input[type="text"],
 .sidebar .wpcf7 input[type="email"],
 .sidebar .wpcf7 input[type="tel"],
@@ -270,6 +327,13 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
 }
 
+/* Fokus-effekt */
+.housing-detail-sidebar .wpcf7 input:focus,
+.housing-detail-sidebar .wpcf7 select:focus,
+.housing-detail-sidebar .wpcf7 textarea:focus,
+.custom-sidebar .wpcf7 input:focus,
+.custom-sidebar .wpcf7 select:focus,
+.custom-sidebar .wpcf7 textarea:focus,
 .sidebar .wpcf7 input:focus,
 .sidebar .wpcf7 select:focus,
 .sidebar .wpcf7 textarea:focus,
@@ -288,6 +352,9 @@
     outline: none !important;
 }
 
+/* Textarea / Personligt brev */
+.housing-detail-sidebar .wpcf7 textarea,
+.custom-sidebar .wpcf7 textarea,
 .sidebar .wpcf7 textarea,
 .flex_column.av_one_third .wpcf7 textarea,
 .flex_column.av_two_fifth .wpcf7 textarea,
@@ -297,6 +364,9 @@
     line-height: 1.5 !important;
 }
 
+/* Rullgardinsmenyer (Select) */
+.housing-detail-sidebar .wpcf7 select,
+.custom-sidebar .wpcf7 select,
 .sidebar .wpcf7 select,
 .flex_column.av_one_third .wpcf7 select,
 .flex_column.av_two_fifth .wpcf7 select,
@@ -311,6 +381,9 @@
     cursor: pointer !important;
 }
 
+/* Skicka-knappen för det stora formuläret */
+.housing-detail-sidebar .wpcf7 input[type="submit"],
+.custom-sidebar .wpcf7 input[type="submit"],
 .sidebar .wpcf7 input[type="submit"],
 .flex_column.av_one_third .wpcf7 input[type="submit"],
 .flex_column.av_two_fifth .wpcf7 input[type="submit"],
@@ -335,6 +408,8 @@
     text-align: center !important;
 }
 
+.housing-detail-sidebar .wpcf7 input[type="submit"]:hover,
+.custom-sidebar .wpcf7 input[type="submit"]:hover,
 .sidebar .wpcf7 input[type="submit"]:hover,
 .flex_column.av_one_third .wpcf7 input[type="submit"]:hover,
 .flex_column.av_two_fifth .wpcf7 input[type="submit"]:hover,
@@ -347,6 +422,7 @@
     color: #ffffff !important;
 }
 
+/* Svarsmeddelanden (Grönt vid lyckat, rött vid fel) */
 .wpcf7-response-output {
     border-radius: 10px !important;
     padding: 12px 14px !important;
