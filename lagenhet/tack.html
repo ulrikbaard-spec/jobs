@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Tack för din intresseanmälan · AB-Hem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --green: #315847;
+            --green-hover: #1e3c2f;
+            --dark: #173c36;
+            --light-bg: #edf3ee;
+            --cream: #f4f0e7;
+            --border: #d4e2d8;
+            --text: #24312b;
+            --muted: #5f7069;
+            --white: #ffffff;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(180deg, #f7faf8 0%, #edf3ee 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 32px 18px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .ab-thankyou-card {
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 12px 36px rgba(23, 60, 54, 0.08);
+            max-width: 540px;
+            width: 100%;
+            padding: 44px 36px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ab-thankyou-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #315847 0%, #528b70 100%);
+        }
+
+        .ab-thankyou-icon {
+            width: 72px;
+            height: 72px;
+            background: #edf3ee;
+            color: var(--green);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 14px rgba(49, 88, 71, 0.12);
+        }
+
+        .ab-thankyou-icon svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        .ab-thankyou-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--green);
+            background: rgba(49, 88, 71, 0.1);
+            padding: 5px 12px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+        }
+
+        .ab-thankyou-title {
+            font-size: clamp(24px, 4vw, 30px);
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 12px;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
+        }
+
+        .ab-thankyou-desc {
+            font-size: 16px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .ab-thankyou-info-box {
+            background: #f8faf8;
+            border: 1px solid #e1ebe4;
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 30px;
+            text-align: left;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .ab-thankyou-info-box svg {
+            width: 22px;
+            height: 22px;
+            color: var(--green);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .ab-thankyou-info-box p {
+            font-size: 14px;
+            color: #384a42;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .ab-thankyou-info-box strong {
+            color: var(--dark);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .ab-thankyou-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ab-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--green);
+            color: var(--white);
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(49, 88, 71, 0.25);
+        }
+
+        .ab-btn-primary:hover {
+            background: var(--green-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(49, 88, 71, 0.35);
+            color: var(--white);
+        }
+
+        .ab-btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 8px 16px;
+            transition: color 0.2s ease;
+        }
+
+        .ab-btn-secondary:hover {
+            color: var(--dark);
+        }
+
+        .ab-thankyou-footer {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #edf3ee;
+            font-size: 13px;
+            color: #7b8d85;
+        }
+
+        .ab-thankyou-footer a {
+            color: var(--green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .ab-thankyou-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="ab-thankyou-card">
+        <div class="ab-thankyou-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"></path>
+            </svg>
+        </div>
+
+        <span class="ab-thankyou-badge">Mottaget</span>
+
+        <h1 class="ab-thankyou-title">Tack för din intresseanmälan!</h1>
+
+        <p class="ab-thankyou-desc">
+            Vi har tagit emot dina kontaktuppgifter. En av våra uthyrare går igenom din förfrågan och <strong>kontaktar er inom kort</strong> för frågor eller visning.
+        </p>
+
+        <div class="ab-thankyou-info-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <div>
+                <strong>Vad händer nu?</strong>
+                <p>Vi hör normalt av oss via telefon eller e-post inom 1–2 vardagar. Håll gärna koll på din inkorg.</p>
+            </div>
+        </div>
+
+        <div class="ab-thankyou-actions">
+            <a href="https://ab-hem.se/lediga-bostader/" class="ab-btn-primary">
+                Se fler lediga lägenheter
+            </a>
+            <a href="https://ab-hem.se/" class="ab-btn-secondary">
+                ← Tillbaka till startsidan
+            </a>
+        </div>
+
+        <div class="ab-thankyou-footer">
+            Frågor under tiden? Maila oss på <a href="mailto:uthyrning@ab-hem.se">uthyrning@ab-hem.se</a>
+        </div>
+    </main>
+
+</body>
+
+</html>
