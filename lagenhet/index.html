@@ -27,7 +27,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Demo Header (efterliknar ab-hem.se) */
         .site-header {
             background: #ffffff;
             border-bottom: 1px solid #e2ebe5;
@@ -79,14 +78,12 @@
             color: #173c36;
         }
 
-        /* Layout Container */
         .page-container {
             max-width: 1180px;
             margin: 0 auto;
             padding: 28px 20px 60px;
         }
 
-        /* Brödsmulor & Topp */
         .breadcrumbs {
             font-size: 12.5px;
             color: #72837b;
@@ -129,7 +126,6 @@
             color: #5f7069;
         }
 
-        /* 2-Kolumners Grid (Vänster innehåll + Höger formulär) */
         .layout-grid {
             display: grid;
             grid-template-columns: 1.45fr 1fr;
@@ -137,12 +133,10 @@
             align-items: flex-start;
         }
 
-        /* Vänster Innehåll */
         .main-content {
             min-width: 0;
         }
 
-        /* Galleri */
         .apartment-gallery {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -175,7 +169,6 @@
             transform: scale(1.03);
         }
 
-        /* Snabba Nyckeltal / Fakta */
         .quick-facts-bar {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -208,7 +201,6 @@
             color: #173c36;
         }
 
-        /* Beskrivning */
         .apartment-desc {
             background: #ffffff;
             border: 1px solid #dce6df;
@@ -235,27 +227,11 @@
             margin-bottom: 0;
         }
 
-        /* Höger Kolumn (Sidebar) */
         .sidebar-column {
             position: sticky;
             top: 86px;
         }
 
-        .demo-note-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #fff8e6;
-            border: 1px solid #f0dcab;
-            color: #875a00;
-            font-size: 12.5px;
-            font-weight: 600;
-            padding: 8px 12px;
-            border-radius: 10px;
-            margin-bottom: 14px;
-        }
-
-        /* Responsiv mobil */
         @media (max-width: 960px) {
             .layout-grid {
                 grid-template-columns: 1fr;
@@ -285,7 +261,6 @@
 
 <body>
 
-    <!-- MOCK SITE HEADER -->
     <header class="site-header">
         <a href="https://ab-hem.se/" class="header-brand">
             <div class="brand-logo-mock">
@@ -300,24 +275,19 @@
 
     <div class="page-container">
 
-        <!-- BRÖDSMULOR -->
         <nav class="breadcrumbs" aria-label="Brödsmulor">
             <a href="https://ab-hem.se/">Start</a> /
             <a href="https://ab-hem.se/lediga_bostader/">Lediga bostäder</a> /
             <span>Norberg · Kärrgruvan</span>
         </nav>
 
-        <!-- OBJEKTS-HEADER -->
         <div class="apartment-header">
             <span class="tag-location">Västmanland · Norberg</span>
             <h1 class="apartment-title">Tvåa i markplan – Kärrgruvan</h1>
             <p class="apartment-sub">Trevlig och rymlig 2:a med uteplats i lugnt och naturskönt område.</p>
         </div>
 
-        <!-- ==================================================================
-             NYCKELKOMPONENT 1: INTRESSEANMÄLAN LIGHT (HÖGST UPP)
-             Detta formulär fångar snabbt upp intressenter innan de scrollar!
-             ================================================================== -->
+        <!-- 1. INTRESSEANMÄLAN LIGHT -->
         <section aria-label="Snabbintresse">
             <div class="ab-light-form">
                 <div class="ab-light-header">
@@ -349,13 +319,10 @@
             </div>
         </section>
 
-        <!-- TVÅKOLUMNERS LAYOUT: INNEHÅLL + STORA FORMULÄRET -->
         <div class="layout-grid">
 
-            <!-- VÄNSTER: BILDER & FAKTA -->
             <main class="main-content">
 
-                <!-- Galleri -->
                 <div class="apartment-gallery">
                     <div class="gallery-item main">
                         <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80" alt="Vardagsrum">
@@ -368,7 +335,6 @@
                     </div>
                 </div>
 
-                <!-- Nyckelfakta -->
                 <div class="quick-facts-bar">
                     <div class="fact-col">
                         <span class="label">Storlek</span>
@@ -388,7 +354,6 @@
                     </div>
                 </div>
 
-                <!-- Beskrivning -->
                 <article class="apartment-desc">
                     <h2>Om lägenheten</h2>
                     <p>
@@ -404,82 +369,100 @@
 
             </main>
 
-            <!-- ==============================================================
-                 NYCKELKOMPONENT 2: DET STORA HÖGERFORMULÄRET (UPPFRÄSCHAD DESIGN)
-                 Detta är det fullständiga formuläret i högerspalten.
-                 ============================================================== -->
+            <!-- 2. FULLSTÄNDIG ANSÖKAN (HÖGERSPALTEN) -->
             <aside class="sidebar-column">
 
-                <div class="demo-note-badge">
-                    <span>✨</span>
-                    <span>Här är det uppfräschade högerformuläret</span>
-                </div>
+                <div class="custom-sidebar ab-full-form-card">
+                    <div class="ab-full-form-header">
+                        <span class="ab-full-badge">Bostadsansökan</span>
+                        <h3 class="ab-full-title">Fullständig ansökan</h3>
+                        <p class="ab-full-desc">Fyll i dina uppgifter nedan för att ansöka om hyresavtal för denna lägenhet.</p>
+                    </div>
 
-                <div class="ab-sidebar-form-card">
-                    <form action="#" method="post" onsubmit="event.preventDefault(); alert('Fullständig intresseanmälan skickad!');">
+                    <form action="#" method="post" onsubmit="event.preventDefault(); alert('Fullständig ansökan skickad!');">
                         
                         <p>
-                            <label for="full-name">För- och efternamn *</label>
-                            <input type="text" id="full-name" name="your-name" placeholder="För- och efternamn" required>
+                            <label for="full-fn">Förnamn *</label>
+                            <input type="text" id="full-fn" name="fornamn" placeholder="Förnamn" required>
+                        </p>
+
+                        <p>
+                            <label for="full-en">Efternamn *</label>
+                            <input type="text" id="full-en" name="efternamn" placeholder="Efternamn" required>
+                        </p>
+
+                        <p>
+                            <label for="full-vuxna">Antal Vuxna *</label>
+                            <select id="full-vuxna" name="antalvuxna" required>
+                                <option value="">– Välj ett alternativ –</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="annat">Annat</option>
+                            </select>
+                        </p>
+
+                        <p>
+                            <label for="full-barn">Antal Barn *</label>
+                            <input type="text" id="full-barn" name="antalbarn" placeholder="0" required>
                         </p>
 
                         <p>
                             <label for="full-pnr">Personnummer (12 siffror) *</label>
-                            <input type="text" id="full-pnr" name="your-personnummer" placeholder="ÅÅÅÅMMDDXXXX" required>
+                            <input type="text" id="full-pnr" name="personnummer" placeholder="ÅÅÅÅMMDDXXXX" required>
                         </p>
 
                         <p>
-                            <label for="full-email">E-postadress *</label>
-                            <input type="email" id="full-email" name="your-email" placeholder="din.epost@exempel.se" required>
+                            <label for="full-email">Email *</label>
+                            <input type="email" id="full-email" name="email" placeholder="namn@exempel.se" required>
                         </p>
 
                         <p>
-                            <label for="full-phone">Telefonnummer *</label>
-                            <input type="tel" id="full-phone" name="your-telefonnummer" placeholder="070-123 45 67" required>
+                            <label for="full-rep-email">Repetera email *</label>
+                            <input type="email" id="full-rep-email" name="confirm_email" placeholder="namn@exempel.se" required>
                         </p>
 
                         <p>
-                            <label for="full-inkomst">Månadsinkomst före skatt (kr) *</label>
-                            <input type="text" id="full-inkomst" name="inkomst" placeholder="T.ex. 28 500" required>
+                            <label for="full-phone1">Telefon 1 *</label>
+                            <input type="tel" id="full-phone1" name="telefon1" placeholder="070-123 45 67" required>
                         </p>
 
                         <p>
-                            <label for="full-typ">Huvudsaklig inkomstkälla *</label>
+                            <label for="full-phone2">Telefon 2</label>
+                            <input type="tel" id="full-phone2" name="telefon2" placeholder="Valfritt">
+                        </p>
+
+                        <p>
+                            <label for="full-inkomst">Huvudsökandens årsinkomst (kr) *</label>
+                            <input type="text" id="full-inkomst" name="inkomst" placeholder="T.ex. 340 000" required>
+                        </p>
+
+                        <p>
+                            <label for="full-typ">Typ av inkomst *</label>
                             <select id="full-typ" name="typavinkomst" required>
                                 <option value="">– Välj ett alternativ –</option>
-                                <option value="Arbete">Arbete (fast eller visstid)</option>
+                                <option value="Arbete">Arbete</option>
                                 <option value="Pension">Pension</option>
                                 <option value="Eget företag">Eget företag</option>
-                                <option value="Studier">Studier / CSN</option>
+                                <option value="Studier">Studier</option>
+                                <option value="A-kassa">A-kassa</option>
                                 <option value="Annat">Annat</option>
                             </select>
                         </p>
 
                         <p>
-                            <label for="full-husdjur">Har du husdjur? *</label>
-                            <select id="full-husdjur" name="Husdjur" required>
-                                <option value="">– Välj ett alternativ –</option>
-                                <option value="Nej">Nej</option>
-                                <option value="Ja">Ja</option>
-                            </select>
+                            <label for="full-arbetsgivare">Nuvarande arbetsgivare</label>
+                            <input type="text" id="full-arbetsgivare" name="nuvarandearbetsgivare" placeholder="Arbetsgivarens namn">
                         </p>
 
                         <p>
-                            <label for="full-rokare">Är du rökare? *</label>
-                            <select id="full-rokare" name="Rokare" required>
-                                <option value="">– Välj ett alternativ –</option>
-                                <option value="Nej">Nej</option>
-                                <option value="Ja">Ja</option>
-                            </select>
+                            <label for="full-hyresvard">Hyresvärds telefonnummer</label>
+                            <input type="tel" id="full-hyresvard" name="hyresvardstelefonnummer" placeholder="Nuvarande hyresvärd">
                         </p>
 
                         <p>
-                            <label for="full-msg">Berätta kort om dig själv och varför du söker *</label>
-                            <textarea id="full-msg" name="personligtbrev" rows="4" placeholder="Skriv några rader om dig och eventuella medboende..." required></textarea>
-                        </p>
-
-                        <p>
-                            <input type="submit" value="Skicka fullständig intresseanmälan" class="wpcf7-submit">
+                            <input type="submit" value="Skicka fullständig ansökan" class="wpcf7-submit">
                         </p>
 
                     </form>
