@@ -15,26 +15,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --green: #315847;
-            --green-hover: #244537;
-            --dark: #173c36;
-            --light: #edf3ee;
-            --cream: #f4f0e7;
-            --cream-border: #e6dfd1;
-            --text: #24312b;
-            --muted: #5f7069;
-            --line: #dbe5df;
-            --white: #ffffff;
-            --radius-lg: 20px;
-            --radius-md: 14px;
-            --radius-sm: 8px;
-            --shadow-sm: 0 2px 8px rgba(23, 60, 54, 0.05);
-            --shadow-md: 0 8px 24px rgba(23, 60, 54, 0.08);
-            --shadow-lg: 0 16px 36px rgba(23, 60, 54, 0.12);
-            --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
         *,
         *::before,
         *::after {
@@ -46,119 +26,171 @@
         body {
             font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: linear-gradient(180deg, #f7faf8 0%, #edf3ee 100%);
-            color: var(--text);
+            color: #24312b;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 32px 18px 48px;
+            padding: 32px 14px 48px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
         }
 
-        .hub-container {
-            width: 100%;
-            max-width: 520px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        .ab-kontakt-hub {
+            --green: #315847;
+            --green-hover: #244537;
+            --green-light: #edf3ee;
+            --dark: #173c36;
+            --cream: #f4f0e7;
+            --cream-border: #e6dfd1;
+            --text: #24312b;
+            --muted: #5f7069;
+            --line: #dbe5df;
+            --white: #ffffff;
+            --shadow-sm: 0 2px 8px rgba(23, 60, 54, 0.05);
+            --shadow-md: 0 8px 24px rgba(23, 60, 54, 0.08);
+
+            font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            color: var(--text) !important;
+            width: 100% !important;
+            max-width: 540px !important;
+            margin: 0 auto !important;
+            clear: both !important;
+            display: block !important;
         }
 
-        /* =========================================================
-           HEADER / PROFIL
-           ========================================================= */
-
-        .hub-header {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 12px 10px;
+        .ab-kontakt-hub *,
+        .ab-kontakt-hub *::before,
+        .ab-kontakt-hub *::after {
+            box-sizing: border-box !important;
         }
 
-        .brand-badge {
-            width: 72px;
-            height: 72px;
-            border-radius: 22px;
-            background: linear-gradient(135deg, #173c36 0%, #315847 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 24px rgba(23, 60, 54, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            color: #ffffff;
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: -0.02em;
+        .ab-kontakt-hub .ab-hub-container {
+            width: 100% !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            display: block !important;
+            clear: both !important;
         }
 
-        .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11.5px;
-            font-weight: 800;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--green);
-            background: rgba(49, 88, 71, 0.08);
-            padding: 4px 12px;
-            border-radius: 999px;
+        .ab-kontakt-hub .ab-hub-header {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            margin: 0 0 26px 0 !important;
+            padding: 0 10px !important;
+            clear: both !important;
+            position: relative !important;
+            height: auto !important;
+            min-height: 0 !important;
         }
 
-        .eyebrow::before {
+        .ab-brand-badge {
+            width: 72px !important;
+            height: 72px !important;
+            border-radius: 22px !important;
+            background: linear-gradient(135deg, #173c36 0%, #315847 100%) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 10px 24px rgba(23, 60, 54, 0.2) !important;
+            border: 2px solid rgba(255, 255, 255, 0.25) !important;
+            color: #ffffff !important;
+            font-size: 24px !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.02em !important;
+            margin-bottom: 12px !important;
+        }
+
+        .ab-kontakt-hub .ab-hub-pill {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            font-size: 11.5px !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.12em !important;
+            text-transform: uppercase !important;
+            color: #315847 !important;
+            background: rgba(49, 88, 71, 0.08) !important;
+            padding: 4px 12px !important;
+            border-radius: 999px !important;
+            margin: 0 auto 12px auto !important;
+        }
+
+        .ab-kontakt-hub .ab-hub-pill::before {
             content: "";
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: var(--green);
+            background: #315847;
         }
 
-        .hub-title {
-            font-size: clamp(26px, 6vw, 32px);
-            font-weight: 800;
-            color: var(--dark);
-            letter-spacing: -0.025em;
-            line-height: 1.2;
+        .ab-kontakt-hub .ab-hub-title {
+            display: block !important;
+            font-size: clamp(24px, 5vw, 30px) !important;
+            font-weight: 800 !important;
+            color: #173c36 !important;
+            letter-spacing: -0.025em !important;
+            line-height: 1.25 !important;
+            margin: 0 0 10px 0 !important;
+            padding: 0 !important;
+            clear: both !important;
         }
 
-        .hub-subtitle {
-            font-size: 14.5px;
-            color: var(--muted);
-            max-width: 420px;
-            line-height: 1.5;
+        .ab-kontakt-hub .ab-hub-subtitle {
+            display: block !important;
+            font-size: 15px !important;
+            color: #5f7069 !important;
+            line-height: 1.55 !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            max-width: 440px !important;
+            clear: both !important;
         }
 
-        /* =========================================================
-           HUVUDLÄNKAR (DE 3 KORTEN)
-           ========================================================= */
-
-        .hub-links {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+        .ab-kontakt-hub .ab-hub-links {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 14px !important;
+            width: 100% !important;
+            margin: 0 0 22px 0 !important;
+            padding: 0 !important;
+            clear: both !important;
         }
 
-        .contact-card {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: var(--white);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-lg);
-            padding: 18px 20px;
-            text-decoration: none;
-            color: inherit;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
+        .ab-kontakt-hub .ab-contact-card {
+            display: flex !important;
+            align-items: center !important;
+            gap: 16px !important;
+            background: #ffffff !important;
+            border: 1.5px solid #dbe5df !important;
+            border-radius: 18px !important;
+            padding: 18px 20px !important;
+            text-decoration: none !important;
+            color: #24312b !important;
+            box-shadow: var(--shadow-sm) !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            width: 100% !important;
+            min-height: 92px !important;
+            margin: 0 !important;
+            float: none !important;
+            clear: both !important;
         }
 
-        .contact-card::before {
+        .ab-kontakt-hub .ab-contact-card + .ab-contact-card {
+            margin-top: 14px !important;
+        }
+        @supports (gap: 14px) {
+            .ab-kontakt-hub .ab-contact-card + .ab-contact-card {
+                margin-top: 0 !important;
+            }
+        }
+
+        .ab-kontakt-hub .ab-contact-card::before {
             content: "";
             position: absolute;
             left: 0;
@@ -166,267 +198,329 @@
             bottom: 0;
             width: 4px;
             background: transparent;
-            transition: var(--transition);
+            transition: all 0.2s ease;
         }
 
-        .contact-card:hover,
-        .contact-card:focus-visible {
-            transform: translateY(-2px);
-            border-color: #b7ccc0;
-            box-shadow: var(--shadow-md);
-            outline: none;
+        .ab-kontakt-hub .ab-contact-card:hover,
+        .ab-kontakt-hub .ab-contact-card:focus-visible {
+            transform: translateY(-2px) !important;
+            border-color: #315847 !important;
+            box-shadow: var(--shadow-md) !important;
+            outline: none !important;
         }
 
-        .contact-card:hover::before {
-            background: var(--green);
+        .ab-kontakt-hub .ab-contact-card:hover::before {
+            background: #315847 !important;
         }
 
-        .contact-card:active {
-            transform: scale(0.99);
+        .ab-kontakt-hub .ab-card-icon-wrap {
+            width: 52px !important;
+            height: 52px !important;
+            min-width: 52px !important;
+            border-radius: 16px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+            transition: transform 0.2s ease !important;
         }
 
-        /* Accent för felanmälan */
-        .card-felanmalan .card-icon-wrap {
-            background: #eef5f1;
-            color: #245840;
-            border: 1px solid #c9e0d2;
+        .ab-kontakt-hub .ab-contact-card:hover .ab-card-icon-wrap {
+            transform: scale(1.06) !important;
         }
 
-        /* Accent för intresseanmälan */
-        .card-intresse .card-icon-wrap {
-            background: #fdf6ec;
-            color: #92540d;
-            border: 1px solid #fae1c3;
+        .ab-kontakt-hub .ab-card-icon-wrap svg {
+            width: 24px !important;
+            height: 24px !important;
+            display: block !important;
         }
 
-        /* Accent för kontakt */
-        .card-kontakt .card-icon-wrap {
-            background: #f0f5fa;
-            color: #1e3a5f;
-            border: 1px solid #d3e2f0;
+        .ab-kontakt-hub .ab-card-felanmalan .ab-card-icon-wrap {
+            background: #eef5f1 !important;
+            color: #245840 !important;
+            border: 1px solid #c9e0d2 !important;
         }
 
-        .card-icon-wrap {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: var(--transition);
+        .ab-kontakt-hub .ab-card-intresse .ab-card-icon-wrap {
+            background: #fdf6ec !important;
+            color: #92540d !important;
+            border: 1px solid #fae1c3 !important;
         }
 
-        .contact-card:hover .card-icon-wrap {
-            transform: scale(1.05);
+        .ab-kontakt-hub .ab-card-kontakt .ab-card-icon-wrap {
+            background: #f0f5fa !important;
+            color: #1e3a5f !important;
+            border: 1px solid #d3e2f0 !important;
         }
 
-        .card-icon-wrap svg {
-            width: 24px;
-            height: 24px;
+        .ab-kontakt-hub .ab-card-content {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            text-align: left !important;
         }
 
-        .card-content {
-            flex: 1;
-            min-width: 0;
+        .ab-kontakt-hub .ab-card-tag {
+            display: block !important;
+            font-size: 11px !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.06em !important;
+            color: #5f7069 !important;
+            margin: 0 0 2px 0 !important;
+            line-height: 1.3 !important;
         }
 
-        .card-tag {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--muted);
-            margin-bottom: 2px;
+        .ab-kontakt-hub .ab-card-title {
+            display: block !important;
+            font-size: 18px !important;
+            font-weight: 800 !important;
+            color: #173c36 !important;
+            line-height: 1.25 !important;
+            margin: 0 0 4px 0 !important;
+            padding: 0 !important;
         }
 
-        .card-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--dark);
-            line-height: 1.25;
-            margin-bottom: 4px;
+        .ab-kontakt-hub .ab-card-desc {
+            display: block !important;
+            font-size: 13.5px !important;
+            color: #5f7069 !important;
+            line-height: 1.45 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
-        .card-desc {
-            font-size: 13px;
-            color: var(--muted);
-            line-height: 1.45;
+        .ab-kontakt-hub .ab-card-arrow {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            border-radius: 50% !important;
+            background: #f4f7f5 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #315847 !important;
+            flex-shrink: 0 !important;
+            transition: all 0.2s ease !important;
         }
 
-        .card-arrow {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #f4f7f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--green);
-            flex-shrink: 0;
-            transition: var(--transition);
+        .ab-kontakt-hub .ab-contact-card:hover .ab-card-arrow {
+            background: #315847 !important;
+            color: #ffffff !important;
+            transform: translateX(3px) !important;
         }
 
-        .contact-card:hover .card-arrow {
-            background: var(--green);
-            color: #ffffff;
-            transform: translateX(3px);
+        .ab-kontakt-hub .ab-card-arrow svg {
+            width: 16px !important;
+            height: 16px !important;
+            display: block !important;
         }
 
-        .card-arrow svg {
-            width: 16px;
-            height: 16px;
+        .ab-kontakt-hub .ab-hub-info-box {
+            background: #f4f0e7 !important;
+            border: 1px solid #e6dfd1 !important;
+            border-radius: 18px !important;
+            padding: 16px 20px !important;
+            margin: 0 0 20px 0 !important;
+            display: block !important;
+            clear: both !important;
         }
 
-        /* =========================================================
-           SNABBINFO & TELEFONJOUR
-           ========================================================= */
-
-        .hub-info-box {
-            background: var(--cream);
-            border: 1px solid var(--cream-border);
-            border-radius: var(--radius-lg);
-            padding: 16px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        .ab-kontakt-hub .ab-info-header {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            margin-bottom: 12px !important;
         }
 
-        .info-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .ab-kontakt-hub .ab-info-icon {
+            font-size: 18px !important;
+            line-height: 1 !important;
         }
 
-        .info-icon {
-            font-size: 18px;
+        .ab-kontakt-hub .ab-info-title {
+            font-size: 14px !important;
+            font-weight: 800 !important;
+            color: #173c36 !important;
+            letter-spacing: -0.01em !important;
         }
 
-        .info-title {
-            font-size: 14px;
-            font-weight: 800;
-            color: var(--dark);
+        .ab-kontakt-hub .ab-info-list {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
         }
 
-        .info-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--text);
+        .ab-kontakt-hub .ab-info-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: baseline !important;
+            gap: 8px !important;
+            padding-bottom: 6px !important;
+            border-bottom: 1px dashed rgba(23, 60, 54, 0.15) !important;
+            font-size: 13px !important;
         }
 
-        .info-item {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 8px;
-            padding-bottom: 6px;
-            border-bottom: 1px dashed rgba(23, 60, 54, 0.12);
+        .ab-kontakt-hub .ab-info-row:last-child {
+            padding-bottom: 0 !important;
+            border-bottom: none !important;
         }
 
-        .info-item:last-child {
-            padding-bottom: 0;
-            border-bottom: none;
+        .ab-kontakt-hub .ab-info-label {
+            font-weight: 600 !important;
+            color: #5f7069 !important;
         }
 
-        .info-label {
-            font-weight: 600;
-            color: var(--muted);
+        .ab-kontakt-hub .ab-info-val {
+            font-weight: 700 !important;
+            color: #173c36 !important;
+            text-align: right !important;
         }
 
-        .info-value {
-            font-weight: 700;
-            color: var(--dark);
-            text-align: right;
+        .ab-kontakt-hub .ab-info-val a {
+            color: #315847 !important;
+            text-decoration: none !important;
+            font-weight: 800 !important;
         }
 
-        .info-value a {
-            color: var(--green);
-            text-decoration: none;
-            font-weight: 800;
+        .ab-kontakt-hub .ab-info-val a:hover {
+            text-decoration: underline !important;
         }
 
-        .info-value a:hover {
-            text-decoration: underline;
+        .ab-kontakt-hub .ab-hub-footer {
+            text-align: center !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 10px !important;
+            margin-top: 10px !important;
+            clear: both !important;
         }
 
-        /* =========================================================
-           FOOTER
-           ========================================================= */
-
-        .hub-footer {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin-top: 6px;
+        .ab-kontakt-hub .ab-btn-website {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            color: #315847 !important;
+            text-decoration: none !important;
+            padding: 8px 16px !important;
+            border-radius: 999px !important;
+            background: rgba(49, 88, 71, 0.08) !important;
+            transition: all 0.2s ease !important;
         }
 
-        .btn-website {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13.5px;
-            font-weight: 700;
-            color: var(--green);
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 999px;
-            background: rgba(49, 88, 71, 0.08);
-            transition: var(--transition);
+        .ab-kontakt-hub .ab-btn-website:hover {
+            background: rgba(49, 88, 71, 0.16) !important;
+            color: #173c36 !important;
         }
 
-        .btn-website:hover {
-            background: rgba(49, 88, 71, 0.14);
-            color: var(--dark);
+        .ab-kontakt-hub .ab-hub-copyright {
+            font-size: 12px !important;
+            color: #8b9992 !important;
         }
 
-        .copyright {
-            font-size: 12px;
-            color: #8b9992;
-        }
-
-        /* Mobilanpassning */
-        @media (max-width: 440px) {
+        @media (max-width: 480px) {
             body {
-                padding: 24px 14px 40px;
+                padding: 20px 10px 36px;
             }
 
-            .contact-card {
-                padding: 16px 16px;
-                gap: 14px;
+            .ab-kontakt-hub .ab-hub-header {
+                margin: 0 0 18px 0 !important;
+                padding: 0 4px !important;
             }
 
-            .card-icon-wrap {
-                width: 46px;
-                height: 46px;
+            .ab-brand-badge {
+                width: 60px !important;
+                height: 60px !important;
+                font-size: 20px !important;
+                border-radius: 18px !important;
+                margin-bottom: 10px !important;
             }
 
-            .card-icon-wrap svg {
-                width: 22px;
-                height: 22px;
+            .ab-kontakt-hub .ab-hub-title {
+                font-size: 24px !important;
+                margin-bottom: 8px !important;
             }
 
-            .card-title {
-                font-size: 17px;
+            .ab-kontakt-hub .ab-hub-subtitle {
+                font-size: 14px !important;
+                line-height: 1.45 !important;
             }
 
-            .card-desc {
-                font-size: 12.5px;
+            .ab-kontakt-hub .ab-hub-links {
+                gap: 12px !important;
+                margin-bottom: 16px !important;
             }
 
-            .info-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 2px;
+            .ab-kontakt-hub .ab-contact-card {
+                padding: 14px 14px !important;
+                gap: 12px !important;
+                border-radius: 16px !important;
+                min-height: 80px !important;
             }
 
-            .info-value {
-                text-align: left;
+            .ab-kontakt-hub .ab-contact-card + .ab-contact-card {
+                margin-top: 12px !important;
+            }
+            @supports (gap: 12px) {
+                .ab-kontakt-hub .ab-contact-card + .ab-contact-card {
+                    margin-top: 0 !important;
+                }
+            }
+
+            .ab-kontakt-hub .ab-card-icon-wrap {
+                width: 44px !important;
+                height: 44px !important;
+                min-width: 44px !important;
+                border-radius: 13px !important;
+            }
+
+            .ab-kontakt-hub .ab-card-icon-wrap svg {
+                width: 20px !important;
+                height: 20px !important;
+            }
+
+            .ab-kontakt-hub .ab-card-tag {
+                font-size: 10.5px !important;
+                margin-bottom: 2px !important;
+            }
+
+            .ab-kontakt-hub .ab-card-title {
+                font-size: 16.5px !important;
+                margin-bottom: 3px !important;
+            }
+
+            .ab-kontakt-hub .ab-card-desc {
+                font-size: 12.5px !important;
+                line-height: 1.4 !important;
+            }
+
+            .ab-kontakt-hub .ab-card-arrow {
+                width: 32px !important;
+                height: 32px !important;
+                min-width: 32px !important;
+            }
+
+            .ab-kontakt-hub .ab-card-arrow svg {
+                width: 14px !important;
+                height: 14px !important;
+            }
+
+            .ab-kontakt-hub .ab-hub-info-box {
+                padding: 14px 16px !important;
+            }
+
+            .ab-kontakt-hub .ab-info-row {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 2px !important;
+            }
+
+            .ab-kontakt-hub .ab-info-val {
+                text-align: left !important;
             }
         }
     </style>
@@ -434,121 +528,123 @@
 
 <body>
 
-    <main class="hub-container" role="main">
+    <main class="ab-kontakt-hub" role="main">
+        <div class="ab-hub-container">
 
-        <!-- LOGO & RUBRIK -->
-        <header class="hub-header">
-            <div class="brand-badge" aria-label="AB-Hem logotyp">
-                AB
+            <!-- INTRO & LOGO -->
+            <div class="ab-hub-header">
+                <div class="ab-brand-badge" aria-label="AB-Hem logotyp">
+                    AB
+                </div>
+                <span class="ab-hub-pill">AB-Hem · Fastigheter</span>
+                <h1 class="ab-hub-title">Hur kan vi hjälpa dig?</h1>
+                <p class="ab-hub-subtitle">
+                    Välj vad ditt ärende gäller nedan för att snabbt komma till rätt kontaktväg hos oss.
+                </p>
             </div>
-            <span class="eyebrow">AB-Hem · Fastigheter</span>
-            <h1 class="hub-title">Hur kan vi hjälpa dig?</h1>
-            <p class="hub-subtitle">
-                Välj vad ditt ärende gäller nedan för att snabbt komma till rätt kontaktväg hos oss.
-            </p>
-        </header>
 
-        <!-- DE 3 KONTAKTLÄNKARNA -->
-        <nav class="hub-links" aria-label="Kontaktvägar till AB-Hem">
+            <!-- DE 3 HUVUDLÄNKARNA -->
+            <div class="ab-hub-links" role="navigation" aria-label="Kontaktvägar till AB-Hem">
 
-            <!-- 1. FELANMÄLAN -->
-            <a href="https://ab-hem.se/felanmalan/" class="contact-card card-felanmalan" id="link-felanmalan">
-                <div class="card-icon-wrap" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                    </svg>
-                </div>
-                <div class="card-content">
-                    <span class="card-tag">För hyresgäster</span>
-                    <h2 class="card-title">Felanmälan</h2>
-                    <p class="card-desc">Gör en felanmälan för din lägenhet eller fastighet direkt online dygnet runt.</p>
-                </div>
-                <div class="card-arrow" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </div>
-            </a>
+                <!-- 1. FELANMÄLAN -->
+                <a href="https://ab-hem.se/felanmalan/" class="ab-contact-card ab-card-felanmalan" id="hub-felanmalan">
+                    <div class="ab-card-icon-wrap" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                        </svg>
+                    </div>
+                    <div class="ab-card-content">
+                        <span class="ab-card-tag">För hyresgäster</span>
+                        <h2 class="ab-card-title">Felanmälan</h2>
+                        <p class="ab-card-desc">Gör en felanmälan för din lägenhet eller fastighet direkt online dygnet runt.</p>
+                    </div>
+                    <div class="ab-card-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </a>
 
-            <!-- 2. INTRESSEANMÄLAN -->
-            <a href="https://ab-hem.se/intresseanmalan/" class="contact-card card-intresse" id="link-intresseanmalan">
-                <div class="card-icon-wrap" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                </div>
-                <div class="card-content">
-                    <span class="card-tag">Söker du bostad?</span>
-                    <h2 class="card-title">Intresseanmälan</h2>
-                    <p class="card-desc">Hitta lediga lägenheter och skicka intresseanmälan i våra 17 kommuner.</p>
-                </div>
-                <div class="card-arrow" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </div>
-            </a>
+                <!-- 2. INTRESSEANMÄLAN -->
+                <a href="https://ab-hem.se/intresseanmalan/" class="ab-contact-card ab-card-intresse" id="hub-intresseanmalan">
+                    <div class="ab-card-icon-wrap" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                    </div>
+                    <div class="ab-card-content">
+                        <span class="ab-card-tag">Söker du bostad?</span>
+                        <h2 class="ab-card-title">Intresseanmälan</h2>
+                        <p class="ab-card-desc">Hitta lediga lägenheter och skicka intresseanmälan i våra 17 kommuner.</p>
+                    </div>
+                    <div class="ab-card-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </a>
 
-            <!-- 3. KONTAKTA OSS -->
-            <a href="https://ab-hem.se/kontakta-oss/" class="contact-card card-kontakt" id="link-kontakta-oss">
-                <div class="card-icon-wrap" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                    </svg>
-                </div>
-                <div class="card-content">
-                    <span class="card-tag">Kundservice & Växel</span>
-                    <h2 class="card-title">Kontakta oss</h2>
-                    <p class="card-desc">Telefonväxel, telefontider, e-postadresser och kontorsadress i Norberg.</p>
-                </div>
-                <div class="card-arrow" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </div>
-            </a>
+                <!-- 3. KONTAKTA OSS -->
+                <a href="https://ab-hem.se/kontakta-oss/" class="ab-contact-card ab-card-kontakt" id="hub-kontakta-oss">
+                    <div class="ab-card-icon-wrap" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                    </div>
+                    <div class="ab-card-content">
+                        <span class="ab-card-tag">Kundservice & Växel</span>
+                        <h2 class="ab-card-title">Kontakta oss</h2>
+                        <p class="ab-card-desc">Telefonväxel, telefontider, e-postadresser och kontorsadress i Norberg.</p>
+                    </div>
+                    <div class="ab-card-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </a>
 
-        </nav>
-
-        <!-- SNABBTELEFON / VÄXEL -->
-        <section class="hub-info-box" aria-label="Snabbkontakt per telefon">
-            <div class="info-header">
-                <span class="info-icon" aria-hidden="true">📞</span>
-                <span class="info-title">Direktkontakt per telefon</span>
             </div>
-            <ul class="info-list">
-                <li class="info-item">
-                    <span class="info-label">Telefonväxel:</span>
-                    <span class="info-value"><a href="tel:058140200">0581-402 00</a></span>
-                </li>
-                <li class="info-item">
-                    <span class="info-label">Telefontider:</span>
-                    <span class="info-value">Vardagar 08.00–12.00</span>
-                </li>
-                <li class="info-item">
-                    <span class="info-label">Akut fastighetsjour:</span>
-                    <span class="info-value"><a href="tel:058140200">0581-402 00 (val 3)</a></span>
-                </li>
-            </ul>
-        </section>
 
-        <!-- FOOTER -->
-        <footer class="hub-footer">
-            <a href="https://ab-hem.se/" class="btn-website" target="_blank" rel="noopener">
-                <span>Gå till ab-hem.se</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                </svg>
-            </a>
-            <span class="copyright">© AB-Hem · Trivsamma hem i natursköna miljöer</span>
-        </footer>
+            <!-- DIREKTKONTAKT & AKUTJOUR -->
+            <div class="ab-hub-info-box" aria-label="Snabbkontakt per telefon">
+                <div class="ab-info-header">
+                    <span class="ab-info-icon" aria-hidden="true">📞</span>
+                    <span class="ab-info-title">Direktkontakt per telefon</span>
+                </div>
+                <div class="ab-info-list">
+                    <div class="ab-info-row">
+                        <span class="ab-info-label">Telefonväxel:</span>
+                        <span class="ab-info-val"><a href="tel:058140200">0581-402 00</a></span>
+                    </div>
+                    <div class="ab-info-row">
+                        <span class="ab-info-label">Telefontider:</span>
+                        <span class="ab-info-val">Vardagar 08.00–12.00</span>
+                    </div>
+                    <div class="ab-info-row">
+                        <span class="ab-info-label">Akut fastighetsjour:</span>
+                        <span class="ab-info-val"><a href="tel:058140200">0581-402 00 (val 3)</a></span>
+                    </div>
+                </div>
+            </div>
 
+            <!-- FOOTER -->
+            <div class="ab-hub-footer">
+                <a href="https://ab-hem.se/" class="ab-btn-website" target="_blank" rel="noopener">
+                    <span>Till ab-hem.se startsida</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                </a>
+                <span class="ab-hub-copyright">© AB-Hem · Trivsamma hem i natursköna miljöer</span>
+            </div>
+
+        </div>
     </main>
 
 </body>
