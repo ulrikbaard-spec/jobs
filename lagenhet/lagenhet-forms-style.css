@@ -154,27 +154,47 @@
     background: #ffffff !important;
 }
 
-/* Submit-knapp för Light */
+/* Submit-knapp för Light - Exakt samma nivå som inmatningsfälten */
 .ab-light-btn-wrap {
     display: flex !important;
-    align-items: flex-end !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.ab-light-btn-wrap::before {
+    content: " " !important;
+    display: block !important;
+    font-size: 12.5px !important;
+    line-height: 1.2 !important;
+    margin: 0 0 2px 0 !important;
+    height: 15px !important;
+    visibility: hidden !important;
 }
 
 .ab-light-form .ab-light-submit,
-.ab-light-form input[type="submit"].ab-light-submit {
+.ab-light-form input[type="submit"].ab-light-submit,
+#top .ab-light-form .ab-light-submit,
+#top .ab-light-form input[type="submit"].ab-light-submit {
     height: 48px !important;
-    padding: 0 24px !important;
+    max-height: 48px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 26px !important;
+    line-height: 46px !important;
+    vertical-align: bottom !important;
     background: var(--green) !important;
     background-color: var(--green) !important;
     color: #ffffff !important;
     font-size: 14.5px !important;
     font-weight: 800 !important;
-    border: none !important;
+    border: 1.5px solid var(--green) !important;
     border-radius: 10px !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     white-space: nowrap !important;
-    box-shadow: 0 2px 8px rgba(49, 88, 71, 0.25) !important;
+    box-shadow: 0 3px 10px rgba(49, 88, 71, 0.25) !important;
 }
 
 .ab-light-form .ab-light-submit:hover,
