@@ -10,249 +10,438 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --green: #315847;
-            --green-hover: #1e3c2f;
-            --dark: #173c36;
-            --light-bg: #edf3ee;
-            --cream: #f4f0e7;
-            --border: #d4e2d8;
-            --text: #24312b;
-            --muted: #5f7069;
-            --white: #ffffff;
-        }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
+            margin: 0;
+            padding: 30px 18px 60px;
+            background: #f7faf8;
             font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(180deg, #f7faf8 0%, #edf3ee 100%);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 32px 18px;
-            line-height: 1.5;
+            color: #24312b;
             -webkit-font-smoothing: antialiased;
         }
 
-        .ab-thankyou-card {
-            background: var(--white);
-            border: 1.5px solid var(--border);
-            border-radius: 24px;
-            box-shadow: 0 12px 36px rgba(23, 60, 54, 0.08);
-            max-width: 540px;
-            width: 100%;
-            padding: 44px 36px;
-            text-align: center;
+        .ab-thankyou {
+            --green: #315847;
+            --dark: #173c36;
+            --cream: #f4f0e7;
+            --light: #edf3ee;
+            --text: #24312b;
+            --muted: #607069;
+            --white: #ffffff;
+
+            max-width: 1100px;
+            margin: 0 auto;
+            color: var(--text);
+        }
+
+        .ab-thankyou * {
+            box-sizing: border-box;
+        }
+
+        /* HERO */
+        .ab-thankyou .hero {
             position: relative;
+            min-height: 390px;
+            border-radius: 10px;
             overflow: hidden;
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(23, 60, 54, .96) 0%,
+                    rgba(23, 60, 54, .82) 45%,
+                    rgba(23, 60, 54, .35) 100%
+                ),
+                url('https://ab-hem.se/wp-content/uploads/2026/09/115.jpg')
+                center/cover;
+            display: flex;
+            align-items: center;
         }
 
-        .ab-thankyou-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, #315847 0%, #528b70 100%);
+        .ab-thankyou .hero-content {
+            padding: 50px;
+            max-width: 720px;
         }
 
-        .ab-thankyou-icon {
-            width: 72px;
-            height: 72px;
-            background: #edf3ee;
-            color: var(--green);
+        .ab-thankyou .check {
+            width: 62px;
+            height: 62px;
             border-radius: 50%;
-            display: inline-flex;
+            background: #ffffff;
+            color: var(--green);
+            display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 30px;
+            font-weight: 700;
             margin-bottom: 22px;
-            box-shadow: 0 4px 14px rgba(49, 88, 71, 0.12);
         }
 
-        .ab-thankyou-icon svg {
-            width: 36px;
-            height: 36px;
+        .ab-thankyou h1 {
+            margin: 0 0 18px !important;
+            color: #ffffff !important;
+            font-size: 46px !important;
+            line-height: 1.05 !important;
+            font-weight: 800 !important;
         }
 
-        .ab-thankyou-badge {
+        .ab-thankyou .hero-text {
+            margin: 0 0 20px !important;
+            color: #ffffff !important;
+            font-size: 20px !important;
+            line-height: 1.5 !important;
+            max-width: 620px;
+        }
+
+        .ab-thankyou .hero-btn {
             display: inline-block;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--green);
-            background: rgba(49, 88, 71, 0.1);
-            padding: 5px 12px;
-            border-radius: 999px;
-            margin-bottom: 14px;
-        }
-
-        .ab-thankyou-title {
-            font-size: clamp(24px, 4vw, 30px);
-            font-weight: 800;
-            color: var(--dark);
-            margin-bottom: 12px;
-            line-height: 1.25;
-            letter-spacing: -0.02em;
-        }
-
-        .ab-thankyou-desc {
-            font-size: 16px;
-            color: var(--muted);
-            line-height: 1.6;
-            margin-bottom: 28px;
-        }
-
-        .ab-thankyou-info-box {
-            background: #f8faf8;
-            border: 1px solid #e1ebe4;
-            border-radius: 14px;
-            padding: 18px 20px;
-            margin-bottom: 30px;
-            text-align: left;
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-        }
-
-        .ab-thankyou-info-box svg {
-            width: 22px;
-            height: 22px;
-            color: var(--green);
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .ab-thankyou-info-box p {
-            font-size: 14px;
-            color: #384a42;
-            line-height: 1.5;
-            margin: 0;
-        }
-
-        .ab-thankyou-info-box strong {
-            color: var(--dark);
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        .ab-thankyou-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .ab-btn-primary {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--green);
-            color: var(--white);
+            background: #ffffff;
+            color: var(--dark) !important;
             font-size: 15px;
             font-weight: 700;
             text-decoration: none;
-            padding: 14px 28px;
-            border-radius: 12px;
+            padding: 12px 24px;
+            border-radius: 30px;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(49, 88, 71, 0.25);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .ab-btn-primary:hover {
-            background: var(--green-hover);
+        .ab-thankyou .hero-btn:hover {
+            background: var(--light);
             transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(49, 88, 71, 0.35);
-            color: var(--white);
         }
 
-        .ab-btn-secondary {
-            display: inline-flex;
+        /* SEKTIONER & INTRO */
+        .ab-thankyou .section {
+            padding: 22px 0;
+        }
+
+        .ab-thankyou .intro {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 30px 35px;
+        }
+
+        .ab-thankyou h2 {
+            margin: 0 0 12px !important;
+            color: var(--dark) !important;
+            font-size: 28px !important;
+            line-height: 1.15 !important;
+            font-weight: 700 !important;
+        }
+
+        .ab-thankyou p {
+            margin: 0 0 12px !important;
+            color: var(--text) !important;
+            font-size: 16px !important;
+            line-height: 1.6 !important;
+        }
+
+        .ab-thankyou p:last-child {
+            margin-bottom: 0 !important;
+        }
+
+        /* VISNING */
+        .ab-thankyou .viewing {
+            background: var(--cream);
+            border-radius: 10px;
+            padding: 32px 35px;
+        }
+
+        .ab-thankyou .viewing-intro {
+            max-width: 800px;
+            margin-bottom: 24px !important;
+        }
+
+        /* VISNINGSSÄTT */
+        .ab-thankyou .options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .ab-thankyou .option {
+            background: #ffffff;
+            border-radius: 9px;
+            padding: 23px;
+            border: 1px solid rgba(49, 88, 71, .10);
+        }
+
+        .ab-thankyou .option-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--light);
+            color: var(--green);
+            display: flex;
             align-items: center;
             justify-content: center;
-            background: transparent;
-            color: var(--muted);
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            padding: 8px 16px;
-            transition: color 0.2s ease;
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 15px;
         }
 
-        .ab-btn-secondary:hover {
-            color: var(--dark);
+        .ab-thankyou .option h3 {
+            margin: 0 0 8px !important;
+            color: var(--dark) !important;
+            font-size: 18px !important;
+            line-height: 1.2 !important;
+            font-weight: 700 !important;
         }
 
-        .ab-thankyou-footer {
-            margin-top: 28px;
-            padding-top: 20px;
-            border-top: 1px solid #edf3ee;
-            font-size: 13px;
-            color: #7b8d85;
+        .ab-thankyou .option p {
+            margin: 0 !important;
+            color: var(--muted) !important;
+            font-size: 14px !important;
+            line-height: 1.5 !important;
         }
 
-        .ab-thankyou-footer a {
-            color: var(--green);
-            text-decoration: none;
-            font-weight: 600;
+        /* EFTER VISNING */
+        .ab-thankyou .after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
         }
 
-        .ab-thankyou-footer a:hover {
-            text-decoration: underline;
+        .ab-thankyou .after-card {
+            background: var(--white);
+            border: 1px solid #dce5df;
+            border-radius: 10px;
+            padding: 28px;
+        }
+
+        .ab-thankyou .after-card.green {
+            background: var(--dark);
+            border-color: var(--dark);
+        }
+
+        .ab-thankyou .after-card h2 {
+            margin-bottom: 10px !important;
+        }
+
+        .ab-thankyou .after-card.green h2 {
+            color: #ffffff !important;
+        }
+
+        .ab-thankyou .after-card.green p {
+            color: #ffffff !important;
+        }
+
+        /* AVSLUTNING */
+        .ab-thankyou .final {
+            position: relative;
+            min-height: 230px;
+            border-radius: 10px;
+            overflow: hidden;
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(49, 88, 71, .96),
+                    rgba(49, 88, 71, .70)
+                ),
+                url('https://ab-hem.se/wp-content/uploads/2026/09/piano.png')
+                center/cover;
+            display: flex;
+            align-items: center;
+        }
+
+        .ab-thankyou .final-content {
+            padding: 35px;
+            max-width: 680px;
+        }
+
+        .ab-thankyou .final h2 {
+            color: #ffffff !important;
+            margin-bottom: 10px !important;
+        }
+
+        .ab-thankyou .final p {
+            color: #ffffff !important;
+            margin-bottom: 0 !important;
+        }
+
+        .ab-thankyou .signature {
+            margin-top: 22px !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+        }
+
+        /* MOBIL */
+        @media(max-width: 850px) {
+            .ab-thankyou .options {
+                grid-template-columns: 1fr;
+            }
+            .ab-thankyou .after {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width: 700px) {
+            .ab-thankyou .section {
+                padding: 12px 0;
+            }
+            .ab-thankyou .hero {
+                min-height: 380px;
+            }
+            .ab-thankyou .hero-content {
+                padding: 30px 25px;
+            }
+            .ab-thankyou h1 {
+                font-size: 34px !important;
+            }
+            .ab-thankyou .hero-text {
+                font-size: 18px !important;
+            }
+            .ab-thankyou .intro,
+            .ab-thankyou .viewing {
+                padding: 25px 20px;
+            }
+            .ab-thankyou .option {
+                padding: 20px;
+            }
+            .ab-thankyou .final-content {
+                padding: 28px 24px;
+            }
+        }
+
+        @media(max-width: 480px) {
+            .ab-thankyou .check {
+                width: 55px;
+                height: 55px;
+                font-size: 27px;
+                margin-bottom: 18px;
+            }
+            .ab-thankyou h1 {
+                font-size: 30px !important;
+            }
+            .ab-thankyou h2 {
+                font-size: 24px !important;
+            }
+            .ab-thankyou p {
+                font-size: 15px !important;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <main class="ab-thankyou-card">
-        <div class="ab-thankyou-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6L9 17l-5-5"></path>
-            </svg>
-        </div>
+    <div class="ab-thankyou">
 
-        <span class="ab-thankyou-badge">Mottaget</span>
-
-        <h1 class="ab-thankyou-title">Tack för din intresseanmälan!</h1>
-
-        <p class="ab-thankyou-desc">
-            Vi har tagit emot dina kontaktuppgifter. En av våra uthyrare går igenom din förfrågan och <strong>kontaktar er inom kort</strong> för frågor eller visning.
-        </p>
-
-        <div class="ab-thankyou-info-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <div>
-                <strong>Vad händer nu?</strong>
-                <p>Vi hör normalt av oss via telefon eller e-post inom 1–2 vardagar. Håll gärna koll på din inkorg.</p>
+        <!-- =========================
+             1. HERO
+        ========================= -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="check">
+                    ✓
+                </div>
+                <h1>
+                    Tack för din intresseanmälan!
+                </h1>
+                <p class="hero-text">
+                    Vi har tagit emot dina kontaktuppgifter. En av våra uthyrare går igenom din anmälan och kontaktar er inom kort.
+                </p>
+                <a href="https://ab-hem.se/lediga-bostader/" class="hero-btn">
+                    Se fler lediga bostäder →
+                </a>
             </div>
-        </div>
+        </section>
 
-        <div class="ab-thankyou-actions">
-            <a href="https://ab-hem.se/lediga-bostader/" class="ab-btn-primary">
-                Se fler lediga lägenheter
-            </a>
-            <a href="https://ab-hem.se/" class="ab-btn-secondary">
-                ← Tillbaka till startsidan
-            </a>
-        </div>
+        <!-- =========================
+             2. VAD HÄNDER NU?
+        ========================= -->
+        <section class="section">
+            <div class="intro">
+                <h2>
+                    Vad händer nu?
+                </h2>
+                <p>
+                    Vi kontaktar dig inom kort med information om lägenheten och eventuell visning.
+                </p>
+                <p>
+                    Visningen kan genomföras på olika sätt beroende på fastigheten. Vi berättar för dig hur visningen går till när vi hörs.
+                </p>
+            </div>
+        </section>
 
-        <div class="ab-thankyou-footer">
-            Frågor under tiden? Maila oss på <a href="mailto:uthyrning@ab-hem.se">uthyrning@ab-hem.se</a>
-        </div>
-    </main>
+        <!-- =========================
+             3. OLIKA TYPER AV VISNING
+        ========================= -->
+        <section class="section">
+            <div class="viewing">
+                <h2>
+                    Så kan visningen gå till
+                </h2>
+                <p class="viewing-intro">
+                    Det finns flera olika sätt att titta på en lägenhet hos AB-Hem. Här är några exempel:
+                </p>
+
+                <div class="options">
+                    <div class="option">
+                        <div class="option-icon">1</div>
+                        <h3>Visning tillsammans</h3>
+                        <p>
+                            Visningen kan genomföras tillsammans med nuvarande hyresgäst eller fastighetsskötare. Du får kontaktuppgifter och kommer själv överens om en passande tid.
+                        </p>
+                    </div>
+
+                    <div class="option">
+                        <div class="option-icon">2</div>
+                        <h3>Öppen visning</h3>
+                        <p>
+                            Ibland ordnar vi en öppen visning där intresserade sökande är välkomna att titta på lägenheten under ett gemensamt tidsintervall.
+                        </p>
+                    </div>
+
+                    <div class="option">
+                        <div class="option-icon">3</div>
+                        <h3>Visning på egen hand</h3>
+                        <p>
+                            I vissa fall sker visningen genom att du själv hämtar en nyckel från en säker nyckelbox och tittar på bostaden i lugn och ro.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================
+             4. EFTER VISNING
+        ========================= -->
+        <section class="section">
+            <div class="after">
+                <div class="after-card">
+                    <h2>Efter visningen</h2>
+                    <p>
+                        Efter visningen får du möjlighet att återkomma till oss och meddela om du fortfarande är intresserad av att hyra lägenheten.
+                    </p>
+                </div>
+
+                <div class="after-card green">
+                    <h2>Ett steg i taget</h2>
+                    <p>
+                        Du behöver inte göra något mer just nu. Vi kontaktar dig inom kort med information om nästa steg.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================
+             5. AVSLUTNING
+        ========================= -->
+        <section class="section">
+            <div class="final">
+                <div class="final-content">
+                    <h2>Tack för att du söker bostad hos AB-Hem!</h2>
+                    <p>
+                        Vi uppskattar ditt intresse och ser fram emot att höra av oss inom kort.
+                    </p>
+                    <p class="signature">
+                        AB-Hem – Uthyrningen
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </div>
 
 </body>
 
